@@ -1,24 +1,105 @@
 {
-  "name": "codesense",
-  "displayName": "codesense",
-  "description": "A baseline extension for web developers",
-  "version": "0.0.1",
+  "name": "CodeSense",
+  "displayName": "CodeSense - Baseline Web Compatibility",
+  "description": "Baseline-powered web compatibility scanner and polyfill manager for modern web development",
+  "version": "0.1.0",
   "type": "module",
   "engines": {
     "vscode": "^1.104.0"
   },
   "categories": [
+    "Linters",
     "Other"
   ],
-  "activationEvents": [],
-  "main": "./dist/extension.js",
+  "keywords": [
+    "baseline",
+    "web-features",
+    "compatibility",
+    "polyfill",
+    "browser-support"
+  ],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:html",
+    "onLanguage:css"
+  ],
+  "main": "./dist/extension-simple.js",
   "contributes": {
     "commands": [
       {
-        "command": "codesense.helloWorld",
-        "title": "Hello World"
+        "command": "CodeSense.scanProject",
+        "title": "🔍 Scan Project for Baseline Compatibility",
+        "category": "CodeSense"
+      },
+      {
+        "command": "CodeSense.scanFile",
+        "title": "🔍 Scan Current File",
+        "category": "CodeSense"
+      },
+      {
+        "command": "CodeSense.generateReport",
+        "title": "📊 Generate Compatibility Report",
+        "category": "CodeSense"
+      },
+      {
+        "command": "CodeSense.injectPolyfills",
+        "title": "💉 Inject Required Polyfills",
+        "category": "CodeSense"
+      },
+      {
+        "command": "CodeSense.showDashboard",
+        "title": "📈 Show Compatibility Dashboard",
+        "category": "CodeSense"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "CodeSense",
+      "properties": {
+        "CodeSense.autoScan": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically scan files on save"
+        },
+        "CodeSense.baselineLevel": {
+          "type": "string",
+          "enum": ["widely", "newly", "all"],
+          "default": "newly",
+          "description": "Minimum Baseline level to consider safe"
+        },
+        "CodeSense.excludePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["node_modules/**", "dist/**", "build/**"],
+          "description": "File patterns to exclude from scanning"
+        },
+        "CodeSense.polyfillStrategy": {
+          "type": "string",
+          "enum": ["auto", "manual", "disabled"],
+          "default": "manual",
+          "description": "Polyfill injection strategy"
+        }
+      }
+    },
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "CodeSense.scanProject",
+          "group": "CodeSense"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "CodeSense.scanFile",
+          "group": "CodeSense"
+        }
+      ]
+    }
+  },
+  "bin": {
+    "CodeSense": "./dist/cli.js"
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -32,12 +113,31 @@
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "build:cli": "tsc src/cli.ts --outDir dist --target ES2020 --module commonjs",
+    "prepublishOnly": "npm run package && npm run build:cli"
+  },
+
+  "dependencies": {
+    "compute-baseline": "^0.4.0",
+    "web-features": "^3.3.0",
+    "@babel/parser": "^7.23.0",
+    "@babel/traverse": "^7.23.0",
+    "@babel/types": "^7.23.0",
+    "postcss": "^8.4.0",
+    "postcss-selector-parser": "^6.0.0",
+    "postcss-value-parser": "^4.2.0",
+    "glob": "^10.3.0",
+    "minimatch": "^9.0.0",
+    "chokidar": "^3.5.0"
   },
   "devDependencies": {
     "@types/vscode": "^1.104.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
+    "@types/babel__parser": "^7.1.0",
+    "@types/babel__traverse": "^7.20.0",
+    "@types/babel__types": "^7.20.0",
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
     "eslint": "^9.36.0",
@@ -46,9 +146,5 @@
     "typescript": "^5.9.3",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2"
-  },
-  "dependencies": {
-    "compute-baseline": "^0.4.0",
-    "web-features": "^3.3.0"
   }
 }
