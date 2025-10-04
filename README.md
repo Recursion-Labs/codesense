@@ -1,71 +1,228 @@
-# codesense README
+# 🎯 CodeSense - Baseline Web Compatibility Tool
 
-This is the README for your extension "codesense". After writing up a brief description, we recommend including the following sections.
+**The first Baseline-native developer tool that makes web feature compatibility actionable in your workflow.**
 
-## Features
+CodeSense automatically scans your codebase for modern web features, checks their Baseline compatibility status, and provides intelligent recommendations for polyfills and alternatives. Stop guessing about browser support—let CodeSense guide your decisions with official Baseline data.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## 🌟 Key Features
 
-For example if there is an image subfolder under your extension project workspace:
+### 🔍 **Intelligent Code Scanning**
+- **AST-based parsing** for JavaScript/TypeScript using Babel
+- **CSS feature detection** with PostCSS integration  
+- **HTML element and attribute analysis**
+- **Multi-file project scanning** with configurable patterns
 
-\!\[feature X\]\(images/feature-x.png\)
+### 📊 **Official Baseline Integration**
+- Direct integration with the **web-features** npm package
+- **Web Platform Dashboard API** for live compatibility data
+- **compute-baseline** for granular BCD key lookups
+- Fuzzy matching and intelligent feature detection
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### 💉 **Smart Polyfill Management**
+- **Automatic polyfill recommendations** based on detected issues
+- **Multiple injection strategies**: CDN, inline, or external bundles
+- **Bundle size optimization** - only include what you need
+- **Package.json integration** for dependency management
 
-## Requirements
+### 📈 **Comprehensive Reporting**
+- **Multiple formats**: Markdown, HTML, JSON, CSV
+- **Interactive HTML dashboards** with compatibility scores
+- **Detailed issue tracking** with line numbers and context
+- **Polyfill recommendations** and alternative API suggestions
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+### 🛠 **Developer Experience**
+- **VS Code extension** with real-time diagnostics
+- **ESLint plugin** for inline warnings during development
+- **CLI tool** for CI/CD integration
+- **Watch mode** for continuous monitoring
 
-## Extension Settings
+## 🚀 Quick Start
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+### VS Code Extension
 
-For example:
+1. Install the CodeSense extension from the VS Code marketplace
+2. Open your project in VS Code
+3. Run **"CodeSense: Scan Project"** from the command palette
+4. View compatibility issues in the Problems panel
+5. Generate detailed reports with **"CodeSense: Generate Report"**
 
-This extension contributes the following settings:
+### CLI Tool
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+```bash
+# Install globally
+npm install -g CodeSense
 
-## Known Issues
+# Scan current directory
+CodeSense
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+# Scan specific path with HTML report
+CodeSense --path ./src --format html
 
-## Release Notes
+# Include polyfill recommendations
+CodeSense --polyfills --polyfill-strategy auto
 
-Users appreciate release notes as you update your extension.
+# Watch mode for continuous monitoring
+CodeSense --watch --verbose
+```
 
-### 1.0.0
+### ESLint Plugin
 
-Initial release of ...
+```javascript
+// eslint.config.js
+import CodeSense from 'eslint-plugin-CodeSense';
 
-### 1.0.1
+export default [
+  {
+    plugins: { CodeSense },
+    rules: {
+      'CodeSense/baseline-compatibility': ['error', {
+        baselineLevel: 'newly',
+        reportUnknown: false
+      }]
+    }
+  }
+];
+```
 
-Fixed issue #.
+## 📋 Configuration
 
-### 1.1.0
+### VS Code Settings
 
-Added features X, Y, and Z.
+```json
+{
+  "CodeSense.autoScan": true,
+  "CodeSense.baselineLevel": "newly",
+  "CodeSense.excludePatterns": ["node_modules/**", "dist/**"],
+  "CodeSense.polyfillStrategy": "manual"
+}
+```
+
+### CLI Configuration File (`CodeSense.config.json`)
+
+```json
+{
+  "baseline": "newly",
+  "exclude": ["node_modules/**", "dist/**", "build/**"],
+  "include": ["src/**/*.{js,ts,jsx,tsx,css,html}"],
+  "format": "html",
+  "polyfills": true,
+  "polyfillStrategy": "auto",
+  "verbose": true
+}
+```
+
+## 🎯 Baseline Levels
+
+- **`widely`** - Only flag features with Limited availability (strictest)
+- **`newly`** - Flag Limited + Newly available features (recommended)
+- **`all`** - Report all detected features including Widely available
+
+## 📊 Example Output
+
+### CLI Summary
+```
+🔍 Scanning /project for baseline compatibility...
+📊 Summary:
+   Compatibility Score: 87%
+   ✅ Widely Available: 45
+   ⚠️ Newly Available: 8
+   ❌ Limited Support: 3
+   ❓ Unknown: 1
+
+⚠️ Warning: 3 features have limited browser support
+```
+
+### HTML Report Features
+- **Interactive compatibility score gauge**
+- **Detailed issue breakdown by file**
+- **Polyfill recommendations with package info**
+- **Alternative API suggestions**
+- **Sortable and filterable results**
+
+## 🔧 Advanced Usage
+
+### Polyfill Injection Strategies
+
+```javascript
+// Auto-inject polyfills
+CodeSense --polyfill-strategy auto
+
+// Manual recommendations only
+CodeSense --polyfill-strategy manual
+
+// Disable polyfill features
+CodeSense --polyfill-strategy disabled
+```
+
+### Custom Exclude Patterns
+
+```bash
+# Exclude test files and documentation
+CodeSense --exclude "**/*.test.js,**/*.spec.ts,docs/**"
+
+# Include only specific directories
+CodeSense --include "src/**,lib/**"
+```
+
+### CI/CD Integration
+
+```yaml
+# GitHub Actions example
+- name: Check Web Compatibility
+  run: |
+    npx CodeSense --format json --output compatibility-report.json
+    # Fail build if compatibility score < 80%
+```
+
+## 🏗 Architecture
+
+### Core Components
+
+1. **Scanner Engine** - AST parsing and feature detection
+2. **Baseline Checker** - Multi-source compatibility lookup
+3. **Report Generator** - Multi-format output with rich visualizations
+4. **Polyfill Manager** - Smart polyfill injection and recommendations
+5. **ESLint Integration** - Real-time linting with auto-fix suggestions
+
+### Data Sources
+
+- **web-features npm package** - Official Baseline feature database
+- **Web Platform Dashboard API** - Live compatibility status
+- **compute-baseline** - Granular BCD key analysis
+- **Built-in polyfill database** - Curated polyfill recommendations
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
+
+```bash
+git clone https://github.com/your-org/CodeSense
+cd CodeSense
+npm install
+npm run compile
+```
+
+### Running Tests
+
+```bash
+npm test
+```
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **WebDX Community Group** for the Baseline initiative
+- **web-features project** for the comprehensive feature database
+- **MDN** and **BCD** for browser compatibility data
+- **Chrome team** for pioneering the Baseline concept
 
 ---
 
-## Following extension guidelines
+**Made with ❤️ for the web development community**
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+*Stop guessing about browser support. Start building with confidence.*
