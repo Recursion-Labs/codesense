@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeSense Example</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Modern HTML elements -->
+    <dialog id="example-dialog">
+        <p>This is a dialog element - newer HTML feature</p>
+        <button onclick="this.parentElement.close()">Close</button>
+    </dialog>
+
+    <details>
+        <summary>Click to expand</summary>
+        <p>Details/summary elements are modern HTML features</p>
+    </details>
+
+    <!-- Progress element -->
+    <progress value="70" max="100">70%</progress>
+
+    <!-- Time element with datetime attribute -->
+    <time datetime="2024-01-15">January 15, 2024</time>
+
+    <!-- Picture element for responsive images -->
+    <picture>
+        <source media="(min-width: 800px)" srcset="large.jpg">
+        <source media="(min-width: 400px)" srcset="medium.jpg">
+        <img src="small.jpg" alt="Responsive image">
+    </picture>
+
+    <!-- Template element -->
+    <template id="card-template">
+        <div class="card">
+            <h3></h3>
+            <p></p>
+        </div>
+    </template>
+
+    <!-- Custom elements (Web Components) -->
+    <custom-element data-value="example"></custom-element>
+
+    <!-- Modern input types -->
+    <input type="date" name="date">
+    <input type="color" name="color">
+    <input type="range" min="0" max="100" name="range">
+
+    <!-- Loading attribute for lazy loading -->
+    <img src="image.jpg" loading="lazy" alt="Lazy loaded image">
+
+    <script src="index.js"></script>
+</body>
+</html>

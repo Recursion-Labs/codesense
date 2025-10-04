@@ -1,0 +1,56 @@
+/* Example CSS file to demonstrate CodeSense CSS scanning */
+
+/* CSS Grid - widely supported now */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+/* CSS Subgrid - newer feature */
+.subgrid-item {
+  display: subgrid;
+  grid-template-columns: subgrid;
+}
+
+/* Container queries - very new */
+@container (min-width: 400px) {
+  .card {
+    display: flex;
+  }
+}
+
+/* CSS clamp() function - newer */
+.responsive-text {
+  font-size: clamp(1rem, 2.5vw, 2rem);
+}
+
+/* CSS custom properties - widely supported */
+:root {
+  --primary-color: #007acc;
+  --secondary-color: #ff6b6b;
+}
+
+/* CSS logical properties - newer */
+.logical-margins {
+  margin-inline-start: 1rem;
+  margin-inline-end: 1rem;
+}
+
+/* Backdrop filter - newer feature */
+.backdrop-blur {
+  backdrop-filter: blur(10px);
+}
+
+/* CSS nesting - very new */
+.nested-example {
+  color: blue;
+  
+  & .child {
+    color: red;
+  }
+  
+  &:hover {
+    color: green;
+  }
+}
