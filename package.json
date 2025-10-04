@@ -1,8 +1,9 @@
 {
   "name": "codesense",
   "displayName": "codesense",
-  "description": "A baseline extention for web developers",
+  "description": "A baseline extension for web developers",
   "version": "0.0.1",
+  "type": "module",
   "engines": {
     "vscode": "^1.104.0"
   },
@@ -45,5 +46,9 @@
     "typescript": "^5.9.3",
     "@vscode/test-cli": "^0.0.11",
     "@vscode/test-electron": "^2.5.2"
+  },
+  "dependencies": {
+    "compute-baseline": "^0.4.0",
+    "web-features": "^3.3.0"
   }
 }
