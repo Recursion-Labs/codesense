@@ -1,0 +1,320 @@
+import * as fs from "fs";
+import * as path from "path";
+import { ScanResult, Issue } from "./scanner";
+
+export interface PolyfillConfig {
+    strategy: 'auto' | 'manual' | 'disabled';
+    outputPath?: string;
+    cdnProvider?: 'polyfill.io' | 'jsdelivr' | 'unpkg';
+    bundleStrategy?: 'inline' | 'external' | 'cdn';
+    targetBrowsers?: string[];
+}
+
+export interface PolyfillInfo {
+    api: string;
+    polyfillName: string;
+    cdnUrl?: string;
+    npmPackage?: string;
+    size?: number;
+    description: string;
+    alternatives?: string[];
+}
+
+export class PolyfillManager {
+    private config: PolyfillConfig;
+    private polyfillDatabase: Map<string, PolyfillInfo>;
+
+    constructor(config: PolyfillConfig = { strategy: 'manual' }) {
+        this.config = config;
+        this.polyfillDatabase = this.initializePolyfillDatabase();
+    }
+
+    async generatePolyfillBundle(scanResults: ScanResult[]): Promise<string> {
+        const requiredPolyfills = this.identifyRequiredPolyfills(scanResults);
+        
+        if (requiredPolyfills.length === 0) {
+            return "// No polyfills required - all features are Baseline compatible!";
+        }
+
+        switch (this.config.bundleStrategy) {
+            case 'cdn':
+                return this.generateCDNBundle(requiredPolyfills);
+            case 'inline':
+                return await this.generateInlineBundle(requiredPolyfills);
+            case 'external':
+            default:
+                return this.generateExternalBundle(requiredPolyfills);
+        }
+    }
+
+    async injectPolyfills(projectPath: string, scanResults: ScanResult[]): Promise<void> {
+        if (this.config.strategy === 'disabled') {
+            return;
+        }
+
+        const polyfillCode = await this.generatePolyfillBundle(scanResults);
+        const outputPath = this.config.outputPath || path.join(projectPath, 'polyfills.js');
+
+        // Write polyfill bundle
+        fs.writeFileSync(outputPath, polyfillCode, 'utf-8');
+
+        // Update HTML files to include polyfills
+        await this.updateHTMLFiles(projectPath, outputPath);
+
+        // Generate package.json dependencies
+        await this.updatePackageJson(projectPath, scanResults);
+    }
+
+    getPolyfillRecommendations(issues: Issue[]): Array<{
+        issue: Issue;
+        polyfill?: PolyfillInfo;
+        recommendation: string;
+    }> {
+        return issues.map(issue => {
+            const polyfill = this.polyfillDatabase.get(issue.api);
+            
+            if (polyfill) {
+                return {
+                    issue,
+                    polyfill,
+                    recommendation: `Use ${polyfill.polyfillName} polyfill`
+                };
+            }
+
+            // Check for alternatives
+            const alternative = this.findAlternative(issue.api);
+            if (alternative) {
+                return {
+                    issue,
+                    recommendation: `Consider using ${alternative} instead`
+                };
+            }
+
+            return {
+                issue,
+                recommendation: `No polyfill available - consider progressive enhancement`
+            };
+        });
+    }
+
+    private identifyRequiredPolyfills(scanResults: ScanResult[]): PolyfillInfo[] {
+        const required = new Set<string>();
+        
+        scanResults.forEach(result => {
+            result.issues.forEach(issue => {
+                if (issue.status === "❌ Limited" && issue.polyfillAvailable) {
+                    required.add(issue.api);
+                }
+            });
+        });
+
+        return Array.from(required)
+            .map(api => this.polyfillDatabase.get(api))
+            .filter((p): p is PolyfillInfo => p !== undefined);
+    }
+
+    private generateCDNBundle(polyfills: PolyfillInfo[]): string {
+        const cdnProvider = this.config.cdnProvider || 'polyfill.io';
+        
+        if (cdnProvider === 'polyfill.io') {
+            const features = polyfills.map(p => p.polyfillName).join(',');
+            return `// Polyfill.io CDN Bundle
+<script src="https://polyfill.io/v3/polyfill.min.js?features=${features}"></script>`;
+        }
+
+        // Individual CDN links
+        return polyfills.map(p => 
+            `<script src="${p.cdnUrl}"></script>`
+        ).join('\n');
+    }
+
+    private async generateInlineBundle(polyfills: PolyfillInfo[]): Promise<string> {
+        const polyfillCode = await Promise.all(
+            polyfills.map(async p => {
+                if (p.cdnUrl) {
+                    try {
+                        const response = await fetch(p.cdnUrl);
+                        return await response.text();
+                    } catch (error) {
+                        return `// Failed to fetch ${p.polyfillName}: ${error}`;
+                    }
+                }
+                return `// ${p.polyfillName} - manual implementation required`;
+            })
+        );
+
+        return `// Inline Polyfill Bundle
+// Generated by CodeSense
+${polyfillCode.join('\n\n')}`;
+    }
+
+    private generateExternalBundle(polyfills: PolyfillInfo[]): string {
+        const imports = polyfills
+            .filter(p => p.npmPackage)
+            .map(p => `import '${p.npmPackage}';`)
+            .join('\n');
+
+        const manual = polyfills
+            .filter(p => !p.npmPackage)
+            .map(p => `// TODO: Manually implement ${p.polyfillName}`)
+            .join('\n');
+
+        return `// External Polyfill Bundle
+// Generated by CodeSense
+
+${imports}
+
+${manual}`;
+    }
+
+    private async updateHTMLFiles(projectPath: string, polyfillPath: string): Promise<void> {
+        const htmlFiles = this.findHTMLFiles(projectPath);
+        const relativePath = path.relative(projectPath, polyfillPath);
+
+        for (const htmlFile of htmlFiles) {
+            const content = fs.readFileSync(htmlFile, 'utf-8');
+            
+            // Check if polyfill is already included
+            if (content.includes(relativePath)) {
+                continue;
+            }
+
+            // Insert before closing head tag
+            const updatedContent = content.replace(
+                '</head>',
+                `  <script src="${relativePath}"></script>\n</head>`
+            );
+
+            fs.writeFileSync(htmlFile, updatedContent, 'utf-8');
+        }
+    }
+
+    private async updatePackageJson(projectPath: string, scanResults: ScanResult[]): Promise<void> {
+        const packageJsonPath = path.join(projectPath, 'package.json');
+        
+        if (!fs.existsSync(packageJsonPath)) {
+            return;
+        }
+
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+        const requiredPolyfills = this.identifyRequiredPolyfills(scanResults);
+        
+        if (!packageJson.dependencies) {
+            packageJson.dependencies = {};
+        }
+
+        requiredPolyfills.forEach(polyfill => {
+            if (polyfill.npmPackage && !packageJson.dependencies[polyfill.npmPackage]) {
+                packageJson.dependencies[polyfill.npmPackage] = 'latest';
+            }
+        });
+
+        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2), 'utf-8');
+    }
+
+    private findHTMLFiles(projectPath: string): string[] {
+        const htmlFiles: string[] = [];
+        
+        function walk(dir: string) {
+            const files = fs.readdirSync(dir);
+            
+            for (const file of files) {
+                const fullPath = path.join(dir, file);
+                const stat = fs.statSync(fullPath);
+                
+                if (stat.isDirectory() && !file.startsWith('.') && file !== 'node_modules') {
+                    walk(fullPath);
+                } else if (file.endsWith('.html')) {
+                    htmlFiles.push(fullPath);
+                }
+            }
+        }
+
+        walk(projectPath);
+        return htmlFiles;
+    }
+
+    private findAlternative(api: string): string | undefined {
+        const alternatives: Record<string, string> = {
+            'fetch': 'XMLHttpRequest or axios library',
+            'intersection-observer': 'scroll event listeners',
+            'resize-observer': 'window.resize event',
+            'clipboard': 'document.execCommand("copy")',
+            'custom-elements': 'regular DOM manipulation',
+            'shadow-dom': 'regular DOM with CSS scoping',
+            'web-components': 'framework components (React, Vue, etc.)'
+        };
+
+        return alternatives[api.toLowerCase()];
+    }
+
+    private initializePolyfillDatabase(): Map<string, PolyfillInfo> {
+        const polyfills = new Map<string, PolyfillInfo>();
+
+        // Core JavaScript polyfills
+        polyfills.set('fetch', {
+            api: 'fetch',
+            polyfillName: 'fetch',
+            cdnUrl: 'https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.2/dist/fetch.umd.js',
+            npmPackage: 'whatwg-fetch',
+            size: 4200,
+            description: 'Fetch API polyfill for older browsers'
+        });
+
+        polyfills.set('promise', {
+            api: 'promise',
+            polyfillName: 'es6-promise',
+            cdnUrl: 'https://cdn.jsdelivr.net/npm/es6-promise@4.2.8/dist/es6-promise.auto.min.js',
+            npmPackage: 'es6-promise',
+            size: 7200,
+            description: 'Promise polyfill for IE and older browsers'
+        });
+
+        // Web APIs
+        polyfills.set('intersection-observer', {
+            api: 'intersection-observer',
+            polyfillName: 'intersection-observer',
+            cdnUrl: 'https://cdn.jsdelivr.net/npm/intersection-observer@0.12.0/intersection-observer.js',
+            npmPackage: 'intersection-observer',
+            size: 5800,
+            description: 'IntersectionObserver API polyfill'
+        });
+
+        polyfills.set('resize-observer', {
+            api: 'resize-observer',
+            polyfillName: 'resize-observer-polyfill',
+            cdnUrl: 'https://cdn.jsdelivr.net/npm/resize-observer-polyfill@1.5.1/dist/ResizeObserver.global.js',
+            npmPackage: 'resize-observer-polyfill',
+            size: 3400,
+            description: 'ResizeObserver API polyfill'
+        });
+
+        polyfills.set('custom-elements', {
+            api: 'custom-elements',
+            polyfillName: 'custom-elements',
+            cdnUrl: 'https://cdn.jsdelivr.net/npm/@webcomponents/custom-elements@1.5.0/custom-elements.min.js',
+            npmPackage: '@webcomponents/custom-elements',
+            size: 8900,
+            description: 'Custom Elements v1 polyfill'
+        });
+
+        // CSS features (handled by PostCSS plugins)
+        polyfills.set('css-property-gap', {
+            api: 'css-property-gap',
+            polyfillName: 'postcss-gap-properties',
+            npmPackage: 'postcss-gap-properties',
+            size: 1200,
+            description: 'CSS gap property polyfill for flexbox'
+        });
+
+        polyfills.set('css-function-clamp', {
+            api: 'css-function-clamp',
+            polyfillName: 'postcss-clamp',
+            npmPackage: 'postcss-clamp',
+            size: 800,
+            description: 'CSS clamp() function polyfill'
+        });
+
+        return polyfills;
+    }
+}
