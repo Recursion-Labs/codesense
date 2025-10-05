@@ -132,25 +132,25 @@ export class CompatibilityScanner {
 
     private getFileType(filePath: string): 'js' | 'ts' | 'css' | 'html' {
         const ext = path.extname(filePath).toLowerCase();
-        if (['.js', '.jsx'].includes(ext)) return 'js';
-        if (['.ts', '.tsx'].includes(ext)) return 'ts';
-        if (ext === '.css') return 'css';
-        if (['.html', '.htm'].includes(ext)) return 'html';
+        if (['.js', '.jsx'].includes(ext)) {return 'js';}
+        if (['.ts', '.tsx'].includes(ext)) {return 'ts';}
+        if (ext === '.css') {return 'css';}
+        if (['.html', '.htm'].includes(ext)) {return 'html';}
         return 'js'; // default
     }
 
     private getSeverity(status: BaselineStatus): 'error' | 'warning' | 'info' {
-        if (status === "❌ Limited") return 'error';
-        if (status === "⚠️ Newly available") return 'warning';
+        if (status === "❌ Limited") {return 'error';}
+        if (status === "⚠️ Newly available") {return 'warning';}
         return 'info';
     }
 
     private shouldReport(status: BaselineStatus): boolean {
         const level = this.options.baselineLevel || 'newly';
         
-        if (level === 'all') return true;
-        if (level === 'newly') return status !== "✅ Widely available";
-        if (level === 'widely') return status === "❌ Limited";
+        if (level === 'all') {return true;}
+        if (level === 'newly') {return status !== "✅ Widely available";}
+        if (level === 'widely') {return status === "❌ Limited";}
         
         return true;
     }

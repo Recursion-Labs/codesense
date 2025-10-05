@@ -5,20 +5,7 @@ import * as path from "path";
 import { CompatibilityScanner, ScanOptions } from "./scanner";
 import { ReportGenerator, ReportOptions } from "./report";
 import { PolyfillManager, PolyfillConfig } from "./polyfill";
-
-interface CLIOptions {
-    path?: string;
-    format?: 'markdown' | 'html' | 'json' | 'csv';
-    output?: string;
-    exclude?: string[];
-    include?: string[];
-    baseline?: 'widely' | 'newly' | 'all';
-    polyfills?: boolean;
-    polyfillStrategy?: 'auto' | 'manual' | 'disabled';
-    verbose?: boolean;
-    watch?: boolean;
-    config?: string;
-}
+import type { CLIOptions } from "./@types/interface";
 
 class CodeSenseCLI {
     private options: CLIOptions;

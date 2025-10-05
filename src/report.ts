@@ -300,7 +300,7 @@ export class ReportGenerator {
     }
 
     private sortResults(results: ScanResult[], sortBy?: string): ScanResult[] {
-        if (!sortBy) return results;
+        if (!sortBy) {return results;}
 
         return results.map(result => ({
             ...result,
@@ -333,8 +333,8 @@ export class ReportGenerator {
         const gauge = '█'.repeat(filled) + '░'.repeat(empty);
         
         let color = '🔴';
-        if (score >= 80) color = '🟢';
-        else if (score >= 60) color = '🟡';
+        if (score >= 80) {color = '🟢';}
+        else if (score >= 60) {color = '🟡';}
         
         return `${color} **Compatibility:** \`${gauge}\` ${score}%`;
     }

@@ -18,9 +18,9 @@ export interface BaselineInfo {
 }
 
 function formatStatus(status: "high" | "low" | false | undefined): BaselineStatus {
-  if (status === "high") return "✅ Widely available";
-  if (status === "low") return "⚠️ Newly available";
-  if (status === false) return "❌ Limited";
+  if (status === "high") {return "✅ Widely available";}
+  if (status === "low") {return "⚠️ Newly available";}
+  if (status === false) {return "❌ Limited";}
   return "❓ Unknown";
 }
 
@@ -74,7 +74,7 @@ function localCheck(api: string): BaselineInfo | null {
 async function bcdCheck(api: string): Promise<BaselineInfo | null> {
   try {
     const bcdKey = mapApiToBCDKey(api);
-    if (!bcdKey) return null;
+    if (!bcdKey) {return null;}
 
     const status = getStatus(null, bcdKey);
     if (status) {
@@ -102,7 +102,7 @@ async function remoteCheck(api: string): Promise<BaselineInfo | null> {
 
     for (const query of queries) {
       const resp = await fetch(`https://api.webstatus.dev/v1/features?q=${encodeURIComponent(query)}`);
-      if (!resp.ok) continue;
+      if (!resp.ok) {continue;}
 
       const result = await resp.json() as {
         data: Array<{ 
@@ -213,8 +213,8 @@ function mapApiToBCDKey(api: string): string | null {
 function levenshteinDistance(str1: string, str2: string): number {
   const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
 
-  for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
-  for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+  for (let i = 0; i <= str1.length; i++) {matrix[0][i] = i;}
+  for (let j = 0; j <= str2.length; j++) {matrix[j][0] = j;}
 
   for (let j = 1; j <= str2.length; j++) {
     for (let i = 1; i <= str1.length; i++) {
