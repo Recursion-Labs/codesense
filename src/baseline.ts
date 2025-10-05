@@ -1,6 +1,15 @@
-import { features } from "web-features";
 import { computeBaseline } from "compute-baseline";
 import { BaselineInfo, BaselineStatus } from "./@types/scanner.js";
+
+// Lazy load web-features to avoid hanging on import
+let features: any = null;
+async function getFeatures() {
+  if (!features) {
+    const { features: f } = await import("web-features");
+    features = f;
+  }
+  return features;
+}
 
 
 
@@ -13,7 +22,8 @@ function formatStatus(status: "high" | "low" | false | undefined): BaselineStatu
 }
 
 // Enhanced local lookup using `web-features`
-function localCheck(api: string): BaselineInfo | null {
+async function localCheck(api: string): Promise<BaselineInfo | null> {
+  const features = await getFeatures();
   // Direct feature lookup
   const directFeature = features[api as keyof typeof features] as any;
   if (directFeature?.status?.baseline !== undefined) {
@@ -153,7 +163,7 @@ export async function baselineCheck(api: string): Promise<BaselineStatus> {
 
 export async function getBaselineInfo(api: string): Promise<BaselineInfo> {
   // Try local lookup first (fastest)
-  const local = localCheck(api);
+  const local = await localCheck(api);
   if (local) {
     return local;
   }
