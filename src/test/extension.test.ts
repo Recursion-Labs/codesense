@@ -1,11 +1,14 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { CompatibilityScanner } from '../scanner';
 import { baselineCheck } from '../baseline';
 import { ReportGenerator } from '../report';
 
 suite('CodeSense Extension Test Suite', () => {
-	vscode.window.showInformationMessage('Starting CodeSense tests...');
+	test('Extension activation', () => {
+		vscode.window.showInformationMessage('Starting CodeSense tests...');
+	});
 
 	test('Baseline check for fetch API', async () => {
 		const status = await baselineCheck('fetch');

@@ -92,35 +92,50 @@ async function remoteCheck(api: string): Promise<BaselineInfo | null> {
     ];
 
     for (const query of queries) {
-      const resp = await fetch(`https://api.webstatus.dev/v1/features?q=${encodeURIComponent(query)}`);
-      if (!resp.ok) {continue;}
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-      const result = await resp.json() as {
-        data: Array<{ 
-          baseline?: { 
-            status?: "widely" | "newly" | "limited";
-            low_date?: string;
-            high_date?: string;
-          };
-          name?: string;
-          feature_id?: string;
-          spec?: { links?: Array<{ url: string }> };
-        }>;
-      };
+      try {
+        const resp = await fetch(`https://api.webstatus.dev/v1/features?q=${encodeURIComponent(query)}`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (!resp.ok) {continue;}
 
-      if (result.data?.length) {
-        const feature = result.data[0];
-        const baselineStatus = feature.baseline?.status;
-        
-        if (baselineStatus) {
-          return {
-            status: formatStatus(baselineStatus === "widely" ? "high" : 
-                              baselineStatus === "newly" ? "low" : false),
-            lowDate: feature.baseline?.low_date,
-            highDate: feature.baseline?.high_date,
-            description: feature.name,
-            spec: feature.spec?.links?.[0]?.url
-          };
+        const result = await resp.json() as {
+          data: Array<{ 
+            baseline?: { 
+              status?: "widely" | "newly" | "limited";
+              low_date?: string;
+              high_date?: string;
+            };
+            name?: string;
+            feature_id?: string;
+            spec?: { links?: Array<{ url: string }> };
+          }>;
+        };
+
+        if (result.data?.length) {
+          const feature = result.data[0];
+          const baselineStatus = feature.baseline?.status;
+          
+          if (baselineStatus) {
+            return {
+              status: formatStatus(baselineStatus === "widely" ? "high" : 
+                                baselineStatus === "newly" ? "low" : false),
+              lowDate: feature.baseline?.low_date,
+              highDate: feature.baseline?.high_date,
+              description: feature.name,
+              spec: feature.spec?.links?.[0]?.url
+            };
+          }
+        }
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.warn('Remote baseline check timed out');
+        } else {
+          throw error;
         }
       }
     }
@@ -139,10 +154,12 @@ export async function baselineCheck(api: string): Promise<BaselineStatus> {
 export async function getBaselineInfo(api: string): Promise<BaselineInfo> {
   // Try local lookup first (fastest)
   const local = localCheck(api);
-  if (local && local.status !== "❓ Unknown") {
+  if (local) {
     return local;
   }
 
+  // Skip BCD and remote for now to avoid hangs
+  /*
   // Try BCD lookup
   const bcd = await bcdCheck(api);
   if (bcd && bcd.status !== "❓ Unknown") {
@@ -154,6 +171,7 @@ export async function getBaselineInfo(api: string): Promise<BaselineInfo> {
   if (remote && remote.status !== "❓ Unknown") {
     return remote;
   }
+  */
 
   return {
     status: "❓ Unknown",
