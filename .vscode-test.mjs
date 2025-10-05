@@ -12,4 +12,5 @@ export default defineConfig({
 		timeout: 10000,
 		grep: 'Baseline Test Suite'
 	},
+	installExtensions: ['ms-vscode.vscode-typescript-next'],
 });
