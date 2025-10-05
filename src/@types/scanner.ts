@@ -18,6 +18,7 @@ export const IssueSchema = z.object({
   severity: z.enum(['low', 'medium', 'high']).optional(),
   polyfillAvailable: z.boolean().optional(),
   alternativeApi: z.string().optional(),
+  api: z.string().optional(),
   message: z.string().optional(),
 });
 export type Issue = z.infer<typeof IssueSchema>;

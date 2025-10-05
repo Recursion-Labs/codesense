@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-import { ScanResult, Issue } from "./scanner";
 import { PolyfillManager } from "./polyfill";
+import { Issue, ScanResult } from "./@types/scanner";
 
 export interface ReportOptions {
     format: 'markdown' | 'html' | 'json' | 'csv';
@@ -125,10 +125,10 @@ export class ReportGenerator {
 
         data.results.forEach(result => {
             result.issues.forEach(issue => {
-                const relativePath = path.relative(folderPath, result.file);
+                const relativePath = path.relative(folderPath, result.filePath);
                 const line = issue.line ? `L${issue.line}` : '-';
                 const context = issue.context ? `\`${issue.context}\`` : '-';
-                
+
                 lines.push(`| ${relativePath} | ${issue.api} | ${issue.status} | ${line} | ${issue.severity} | ${context} |`);
             });
         });
@@ -251,10 +251,10 @@ export class ReportGenerator {
                 </tr>
             </thead>
             <tbody>
-                ${data.results.map(result => 
+                ${data.results.map(result =>
                     result.issues.map(issue => `
                         <tr>
-                            <td>${path.relative(folderPath, result.file)}</td>
+                            <td>${path.relative(folderPath, result.filePath)}</td>
                             <td><code>${issue.api}</code></td>
                             <td>${issue.status}</td>
                             <td>${issue.line ? `L${issue.line}` : '-'}</td>
@@ -286,10 +286,10 @@ export class ReportGenerator {
         
         data.results.forEach(result => {
             result.issues.forEach(issue => {
-                const relativePath = path.relative(folderPath, result.file);
+                const relativePath = path.relative(folderPath, result.filePath);
                 const line = issue.line || '';
                 const context = (issue.context || '').replace(/"/g, '""');
-                
+
                 lines.push(`"${relativePath}","${issue.api}","${issue.status}","${line}","${issue.severity}","${context}"`);
             });
         });
@@ -307,17 +307,20 @@ export class ReportGenerator {
             issues: result.issues.sort((a, b) => {
                 switch (sortBy) {
                     case 'severity':
-                        const severityOrder = { error: 0, warning: 1, info: 2 };
-                        return severityOrder[a.severity] - severityOrder[b.severity];
+                        // Extend severityOrder to include all possible values, or handle unknowns
+                        const severityOrder: { [key: string]: number } = { error: 0, warning: 1, info: 2, high: 0, medium: 1, low: 2 };
+                        const aSeverity = a.severity && severityOrder[a.severity] !== undefined ? severityOrder[a.severity] : Number.MAX_SAFE_INTEGER;
+                        const bSeverity = b.severity && severityOrder[b.severity] !== undefined ? severityOrder[b.severity] : Number.MAX_SAFE_INTEGER;
+                        return aSeverity - bSeverity;
                     case 'api':
-                        return a.api.localeCompare(b.api);
+                        return (a.api ?? '').localeCompare(b.api ?? '');
                     default:
                         return 0;
                 }
             })
         })).sort((a, b) => {
             if (sortBy === 'file') {
-                return a.file.localeCompare(b.file);
+                return a.filePath.localeCompare(b.filePath);
             }
             return 0;
         });

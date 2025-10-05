@@ -26,5 +26,22 @@ export type ScanOptions = z.infer<typeof ScanOptionsSchema>;
 
 export const PolyfillConfigSchema = z.object({
   strategy: z.enum(['auto', 'manual', 'disabled']),
+  bundleStrategy: z.enum(['inline', 'external', 'cdn']).optional(),
+  outputPath: z.string().optional(),
+  cdnProvider: z.enum(['polyfill.io', 'jsdelivr', 'unpkg']).optional(),
+  targetBrowsers: z.array(z.string()).optional(),
 });
 export type PolyfillConfig = z.infer<typeof PolyfillConfigSchema>;
+
+
+export const PolyfillInfoSchema = z.object({
+    api: z.string(),
+    polyfillName: z.string(),
+    cdnUrl: z.string().optional(),
+    npmPackage: z.string().optional(),
+    size: z.number().optional(),
+    description: z.string().optional(),
+    alternatives: z.array(z.string()).optional(),
+});
+export type PolyfillInfo = z.infer<typeof PolyfillInfoSchema>;
+
