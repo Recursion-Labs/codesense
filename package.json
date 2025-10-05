@@ -63,7 +63,11 @@
         },
         "CodeSense.baselineLevel": {
           "type": "string",
-          "enum": ["widely", "newly", "all"],
+          "enum": [
+            "widely",
+            "newly",
+            "all"
+          ],
           "default": "newly",
           "description": "Minimum Baseline level to consider safe"
         },
@@ -72,12 +76,20 @@
           "items": {
             "type": "string"
           },
-          "default": ["node_modules/**", "dist/**", "build/**"],
+          "default": [
+            "node_modules/**",
+            "dist/**",
+            "build/**"
+          ],
           "description": "File patterns to exclude from scanning"
         },
         "CodeSense.polyfillStrategy": {
           "type": "string",
-          "enum": ["auto", "manual", "disabled"],
+          "enum": [
+            "auto",
+            "manual",
+            "disabled"
+          ],
           "default": "manual",
           "description": "Polyfill injection strategy"
         }
@@ -133,16 +145,16 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
-    "@types/vscode": "^1.104.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
+    "@types/vscode": "^1.104.0",
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
-    "eslint": "^9.36.0",
-    "esbuild": "^0.25.10",
-    "npm-run-all": "^4.1.5",
-    "typescript": "^5.9.3",
     "@vscode/test-cli": "^0.0.11",
-    "@vscode/test-electron": "^2.5.2"
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.25.10",
+    "eslint": "^9.36.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.3"
   }
 }
