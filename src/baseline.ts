@@ -1,21 +1,9 @@
 import { features } from "web-features";
-import { getStatus } from "compute-baseline";
+import { baseline } from "compute-baseline";
+import { BaselineInfo, BaselineStatus } from "./@types/scanner";
 
-export type BaselineStatus =
-  | "✅ Widely available"
-  | "⚠️ Newly available"
-  | "❌ Limited"
-  | "❓ Unknown";
 
-export interface BaselineInfo {
-  status: BaselineStatus;
-  lowDate?: string;
-  highDate?: string;
-  support?: Record<string, string>;
-  description?: string;
-  spec?: string;
-  mdn?: string;
-}
+
 
 function formatStatus(status: "high" | "low" | false | undefined): BaselineStatus {
   if (status === "high") {return "✅ Widely available";}
@@ -76,14 +64,17 @@ async function bcdCheck(api: string): Promise<BaselineInfo | null> {
     const bcdKey = mapApiToBCDKey(api);
     if (!bcdKey) {return null;}
 
-    const status = getStatus(null, bcdKey);
+    const status = baseline.computeBaseline({ compatKeys: [bcdKey] });
+
     if (status) {
-      return {
-        status: formatStatus(status.baseline as any),
-        lowDate: status.baseline_low_date,
-        highDate: status.baseline_high_date,
-        support: status.support
-      };
+      const support: Record<string, string> = {};
+      if (status.support) {
+        for (const [browser, initialSupport] of status.support) {
+          if (initialSupport) {
+            support[browser.name] = initialSupport.release.version;
+          }
+        }
+      }
     }
   } catch (error) {
     // Silently fail for BCD lookup

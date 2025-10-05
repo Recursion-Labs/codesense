@@ -213,7 +213,6 @@ function parseArgs(): CLIOptions {
             case '--help':
             case '-h':
                 printHelp();
-                process.exit(0);
                 break;
         }
     }

@@ -1,6 +1,7 @@
 import { Rule } from "eslint";
-import { baselineCheck, BaselineStatus } from "./baseline";
+import { baselineCheck } from "./baseline";
 import { parseJavaScript } from "./parsers";
+import { BaselineStatus } from "./@types/scanner";
 
 interface CodeSenseESLintOptions {
     baselineLevel?: 'widely' | 'newly' | 'all';

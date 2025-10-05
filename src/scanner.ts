@@ -1,32 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
 import { glob } from "glob";
-import { minimatch } from "minimatch";
-import { baselineCheck, BaselineStatus } from "./baseline";
+import { baselineCheck } from "./baseline";
 import { parseJavaScript, parseCSS, parseHTML } from "./parsers";
+import { BaselineStatus, Issue, ScanResult } from "./@types/scanner";
 
-export interface Issue {
-    api: string;
-    status: BaselineStatus;
-    line?: number;
-    column?: number;
-    context?: string;
-    severity: 'error' | 'warning' | 'info';
-    polyfillAvailable?: boolean;
-    alternativeApi?: string;
-}
-
-export interface ScanResult {
-    file: string;
-    fileType: 'js' | 'ts' | 'css' | 'html';
-    issues: Issue[];
-    summary: {
-        safe: number;
-        partial: number;
-        risky: number;
-        total: number;
-    };
-}
 
 export interface ScanOptions {
     excludePatterns?: string[];
@@ -92,7 +70,7 @@ export class CompatibilityScanner {
             
             if (this.shouldReport(status)) {
                 issues.push({
-                    api: feature.api,
+                    feature: feature.api,
                     status,
                     line: feature.line,
                     column: feature.column,
@@ -139,10 +117,11 @@ export class CompatibilityScanner {
         return 'js'; // default
     }
 
-    private getSeverity(status: BaselineStatus): 'error' | 'warning' | 'info' {
-        if (status === "❌ Limited") {return 'error';}
-        if (status === "⚠️ Newly available") {return 'warning';}
-        return 'info';
+    private getSeverity(status: BaselineStatus): 'high' | 'medium' | 'low' | undefined {
+        if (status === "❌ Limited") {return 'high';}
+        if (status === "⚠️ Newly available") {return 'medium';}
+        if (status === "✅ Widely available") {return 'low';}
+        return undefined;
     }
 
     private shouldReport(status: BaselineStatus): boolean {
