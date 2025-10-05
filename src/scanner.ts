@@ -1,9 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
 import { glob } from "glob";
-import { baselineCheck } from "./baseline";
-import { parseJavaScript, parseCSS, parseHTML } from "./parsers";
-import { BaselineStatus, Issue, ScanResult } from "./@types/scanner";
+import { baselineCheck } from "./baseline.js";
+import { parseJavaScript, parseCSS, parseHTML } from "./parsers.js";
+import { BaselineStatus, Issue, ScanResult } from "./@types/scanner.js";
 
 
 export interface ScanOptions {

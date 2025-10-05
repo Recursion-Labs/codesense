@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { getBaselineInfo, baselineCheck } from '../baseline';
+import { getBaselineInfo, baselineCheck } from '../baseline.js';
 
 suite('Baseline Test Suite', () => {
     test('should return Widely available for fetch', async () => {

@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-import { Issue, ScanResult } from "./@types/scanner";
-import { PolyfillConfig, PolyfillInfo } from "./@types/cli";
+import { Issue, ScanResult } from "./@types/scanner.js";
+import { PolyfillConfig, PolyfillInfo } from "./@types/cli.js";
 
 
 export class PolyfillManager {

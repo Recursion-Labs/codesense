@@ -2,10 +2,11 @@
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';
-import { CompatibilityScanner } from '../scanner';
+import { fileURLToPath } from 'url';
+import { CompatibilityScanner } from '../scanner.js';
 
 suite('Scanner Test Suite', () => {
-    const testDir = path.join(__dirname, 'scanner-test-project');
+    const testDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'scanner-test-project');
 
     suiteSetup(() => {
         if (!fs.existsSync(testDir)) {

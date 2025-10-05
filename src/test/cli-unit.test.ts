@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-import { CodeSenseCLI } from '../cli';
-import { CompatibilityScanner } from '../scanner';
-import { ReportGenerator } from '../report';
+import { CodeSenseCLI } from '../cli.js';
+import { CompatibilityScanner } from '../scanner.js';
+import { ReportGenerator } from '../report.js';
 
 suite('CLI Unit Test Suite', () => {
     let scannerStub: sinon.SinonStub;

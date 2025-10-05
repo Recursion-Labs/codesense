@@ -3,6 +3,7 @@ import * as path from 'path';
 
 export default defineConfig({
 	files: 'out/test/**/*.test.js',
+	headless: true,
 	launchArgs: [
 		'--folder-uri', `file://${path.resolve('example')}`,
 		'--file', 'index.html',

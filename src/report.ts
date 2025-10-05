@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-import { PolyfillManager } from "./polyfill";
-import { Issue, ScanResult } from "./@types/scanner";
+import { PolyfillManager } from "./polyfill.js";
+import { Issue, ScanResult } from "./@types/scanner.js";
 
 export interface ReportOptions {
     format: 'markdown' | 'html' | 'json' | 'csv';

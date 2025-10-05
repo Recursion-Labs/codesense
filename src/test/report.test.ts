@@ -1,11 +1,12 @@
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ReportGenerator } from '../report';
-import { ScanResult } from '../@types/scanner';
+import { fileURLToPath } from 'url';
+import { ReportGenerator } from '../report.js';
+import { ScanResult } from '../@types/scanner.js';
 
 suite('ReportGenerator Test Suite', () => {
-    const testDir = path.join(__dirname, 'report-test-project');
+    const testDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'report-test-project');
     const reportGenerator = new ReportGenerator();
     const scanResults: ScanResult[] = [
         {

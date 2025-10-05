@@ -1,11 +1,12 @@
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 
 suite('CLI Test Suite', () => {
-    const testDir = path.join(__dirname, 'cli-test-project');
-    const cliPath = path.join(__dirname, '../../dist/cli.js');
+    const testDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'cli-test-project');
+    const cliPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../dist/cli.js');
 
     suiteSetup(() => {
         if (!fs.existsSync(testDir)) {

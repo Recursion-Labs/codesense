@@ -1,6 +1,6 @@
 import { features } from "web-features";
 import * as computeBaselinePkg from "compute-baseline";
-import { BaselineInfo, BaselineStatus } from "./@types/scanner";
+import { BaselineInfo, BaselineStatus } from "./@types/scanner.js";
 
 
 

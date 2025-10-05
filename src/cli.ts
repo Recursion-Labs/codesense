@@ -2,10 +2,10 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import { CompatibilityScanner, ScanOptions } from "./scanner";
-import { ReportGenerator, ReportOptions } from "./report";
-import { PolyfillManager } from "./polyfill";
-import type { CLIOptions, PolyfillConfig } from "./@types/interface";
+import { CompatibilityScanner, ScanOptions } from "./scanner.js";
+import { ReportGenerator, ReportOptions } from "./report.js";
+import { PolyfillManager } from "./polyfill.js";
+import type { CLIOptions, PolyfillConfig } from "./@types/interface.js";
 
 class CodeSenseCLI {
     private options: CLIOptions;
