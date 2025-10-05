@@ -1,31 +1,15 @@
 import * as fs from "fs";
 import * as path from "path";
-import { ScanResult, Issue } from "./scanner";
+import { Issue, ScanResult } from "./@types/scanner";
+import { PolyfillConfig, PolyfillInfo } from "./@types/cli";
 
-export interface PolyfillConfig {
-    strategy: 'auto' | 'manual' | 'disabled';
-    outputPath?: string;
-    cdnProvider?: 'polyfill.io' | 'jsdelivr' | 'unpkg';
-    bundleStrategy?: 'inline' | 'external' | 'cdn';
-    targetBrowsers?: string[];
-}
-
-export interface PolyfillInfo {
-    api: string;
-    polyfillName: string;
-    cdnUrl?: string;
-    npmPackage?: string;
-    size?: number;
-    description: string;
-    alternatives?: string[];
-}
 
 export class PolyfillManager {
     private config: PolyfillConfig;
     private polyfillDatabase: Map<string, PolyfillInfo>;
 
     constructor(config: PolyfillConfig = { strategy: 'manual' }) {
-        this.config = config;
+        this.config = { ...config, bundleStrategy: (config as any).bundleStrategy || 'external' } as any;
         this.polyfillDatabase = this.initializePolyfillDatabase();
     }
 
@@ -71,7 +55,7 @@ export class PolyfillManager {
         recommendation: string;
     }> {
         return issues.map(issue => {
-            const polyfill = this.polyfillDatabase.get(issue.api);
+            const polyfill = this.polyfillDatabase.get(issue.api!);
             
             if (polyfill) {
                 return {
@@ -82,7 +66,7 @@ export class PolyfillManager {
             }
 
             // Check for alternatives
-            const alternative = this.findAlternative(issue.api);
+            const alternative = this.findAlternative(issue.api!);
             if (alternative) {
                 return {
                     issue,
@@ -103,7 +87,7 @@ export class PolyfillManager {
         scanResults.forEach(result => {
             result.issues.forEach(issue => {
                 if (issue.status === "❌ Limited" && issue.polyfillAvailable) {
-                    required.add(issue.api);
+                    required.add(issue.api!);
                 }
             });
         });

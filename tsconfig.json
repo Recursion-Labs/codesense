@@ -7,8 +7,8 @@
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
-    "moduleResolution": "Node",
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src"]

@@ -2,8 +2,9 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { CompatibilityScanner, ScanOptions } from "./scanner";
 import { ReportGenerator, ReportOptions } from "./report";
-import { PolyfillManager, PolyfillConfig } from "./polyfill";
 import { getBaselineInfo } from "./baseline";
+import { PolyfillConfig } from "./@types/cli";
+import { PolyfillManager } from "./polyfill";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 let scanner: CompatibilityScanner;
@@ -255,11 +256,11 @@ function createDiagnosticsFromIssues(issues: any[]): vscode.Diagnostic[] {
 
 async function onDocumentSave(document: vscode.TextDocument) {
     const config = getConfiguration();
-    if (!config.get('autoScan', true)) return;
+    if (!config.get('autoScan', true)) {return;}
     
     // Only scan supported file types
     const supportedLanguages = ['javascript', 'typescript', 'css', 'html'];
-    if (!supportedLanguages.includes(document.languageId)) return;
+    if (!supportedLanguages.includes(document.languageId)) {return;}
     
     try {
         const result = await scanner.scanFile(document.uri.fsPath);
@@ -344,13 +345,13 @@ class BaselineHoverProvider implements vscode.HoverProvider {
         token: vscode.CancellationToken
     ): Promise<vscode.Hover | undefined> {
         const wordRange = document.getWordRangeAtPosition(position);
-        if (!wordRange) return;
+        if (!wordRange) {return;}
 
         const word = document.getText(wordRange);
         
         // Check if this looks like a web API
         const webAPIPattern = /^(fetch|navigator|localStorage|sessionStorage|indexedDB|IntersectionObserver|ResizeObserver)$/i;
-        if (!webAPIPattern.test(word)) return;
+        if (!webAPIPattern.test(word)) {return;}
 
         try {
             const baselineInfo = await getBaselineInfo(word.toLowerCase());

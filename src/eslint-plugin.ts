@@ -1,6 +1,6 @@
 import { Rule } from "eslint";
-import { baselineCheck, BaselineStatus } from "./baseline";
-import { parseJavaScript } from "./parsers";
+import { baselineCheck } from "./baseline";
+import { BaselineStatus } from "./@types/scanner";
 
 interface CodeSenseESLintOptions {
     baselineLevel?: 'widely' | 'newly' | 'all';
@@ -80,7 +80,7 @@ const baselineRule: Rule.RuleModule = {
         function reportIssue(api: string, status: BaselineStatus, node: any) {
             const shouldReport = getShouldReport(status, baselineLevel, reportUnknown);
             
-            if (!shouldReport) return;
+            if (!shouldReport) {return;}
 
             const messageId = getMessageId(status);
             const data = { api };
@@ -94,9 +94,9 @@ const baselineRule: Rule.RuleModule = {
         }
 
         function getShouldReport(status: BaselineStatus, level: string, reportUnknown: boolean): boolean {
-            if (status === "❌ Limited") return true;
-            if (status === "⚠️ Newly available" && level !== 'widely') return true;
-            if (status === "❓ Unknown" && reportUnknown) return true;
+            if (status === "❌ Limited") {return true;}
+            if (status === "⚠️ Newly available" && level !== 'widely') {return true;}
+            if (status === "❓ Unknown" && reportUnknown) {return true;}
             return false;
         }
 
@@ -134,7 +134,7 @@ const baselineRule: Rule.RuleModule = {
                     suggestions.push({
                         messageId: "alternativeSuggestion",
                         data: { api, alternative },
-                        fix: null // Manual fix required
+                        fix: () => null // Manual fix required
                     });
                 }
             }
