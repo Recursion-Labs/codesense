@@ -30,7 +30,7 @@ class CodeSenseCLI {
         this.options = this.loadConfig(options);
         
         const scanOptions: ScanOptions = {
-            excludePatterns: this.options.exclude,
+            excludePatterns: this.options.exclude || ['node_modules/**', 'dist/**', 'build/**', '.git/**'],
             includePatterns: this.options.include,
             baselineLevel: this.options.baseline || 'newly'
         };

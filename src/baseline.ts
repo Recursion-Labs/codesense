@@ -1,5 +1,5 @@
 import { features } from "web-features";
-import { getStatus } from "compute-baseline";
+import { baseline } from "compute-baseline";
 
 export type BaselineStatus =
   | "✅ Widely available"
@@ -45,7 +45,7 @@ function localCheck(api: string): BaselineInfo | null {
       key.toLowerCase(),
       feature.name?.toLowerCase(),
       ...(feature.compat_features || []).map((cf: string) => cf.toLowerCase())
-    ];
+    ].filter(Boolean);
     
     const normalizedApi = normalizeApiName(api);
     return searchTerms.some(term => 
@@ -76,13 +76,21 @@ async function bcdCheck(api: string): Promise<BaselineInfo | null> {
     const bcdKey = mapApiToBCDKey(api);
     if (!bcdKey) return null;
 
-    const status = getStatus(null, bcdKey);
+    const status = baseline.computeBaseline({ compatKeys: [bcdKey] });
     if (status) {
+      const support: Record<string, string> = {};
+      if (status.support) {
+        for (const [browser, initialSupport] of status.support) {
+          if (initialSupport) {
+            support[browser.name] = initialSupport.release.version;
+          }
+        }
+      }
       return {
         status: formatStatus(status.baseline as any),
         lowDate: status.baseline_low_date,
         highDate: status.baseline_high_date,
-        support: status.support
+        support,
       };
     }
   } catch (error) {

@@ -3,7 +3,7 @@
   "displayName": "CodeSense - Baseline Web Compatibility",
   "description": "Baseline-powered web compatibility scanner and polyfill manager for modern web development",
   "version": "0.1.0",
-  "type": "module",
+
   "engines": {
     "vscode": "^1.104.0"
   },
@@ -63,7 +63,11 @@
         },
         "CodeSense.baselineLevel": {
           "type": "string",
-          "enum": ["widely", "newly", "all"],
+          "enum": [
+            "widely",
+            "newly",
+            "all"
+          ],
           "default": "newly",
           "description": "Minimum Baseline level to consider safe"
         },
@@ -72,12 +76,20 @@
           "items": {
             "type": "string"
           },
-          "default": ["node_modules/**", "dist/**", "build/**"],
+          "default": [
+            "node_modules/**",
+            "dist/**",
+            "build/**"
+          ],
           "description": "File patterns to exclude from scanning"
         },
         "CodeSense.polyfillStrategy": {
           "type": "string",
-          "enum": ["auto", "manual", "disabled"],
+          "enum": [
+            "auto",
+            "manual",
+            "disabled"
+          ],
           "default": "manual",
           "description": "Polyfill injection strategy"
         }
@@ -114,34 +126,34 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
     "test": "vscode-test",
-    "build:cli": "tsc src/cli.ts --outDir dist --target ES2020 --module commonjs",
+    "build:cli": "tsc src/cli.ts --outDir dist --target ES2022 --module commonjs",
     "prepublishOnly": "npm run package && npm run build:cli"
   },
-
   "dependencies": {
-  "compute-baseline": "^0.4.0",
-  "web-features": "^3.3.0",
-  "@babel/parser": "^7.23.0",
-  "@babel/traverse": "^7.23.0",
-  "@babel/types": "^7.23.0",
-  "postcss": "^8.4.0",
-  "postcss-selector-parser": "^6.0.0",
-  "postcss-value-parser": "^4.2.0",
-  "glob": "^10.3.0",
-  "minimatch": "^9.0.0",
-  "chokidar": "^3.5.0"
-},
-"devDependencies": {
-  "@types/vscode": "^1.104.0",
-  "@types/mocha": "^10.0.10",
-  "@types/node": "22.x",
-  "@typescript-eslint/eslint-plugin": "^8.45.0",
-  "@typescript-eslint/parser": "^8.45.0",
-  "eslint": "^9.36.0",
-  "esbuild": "^0.25.10",
-  "npm-run-all": "^4.1.5",
-  "typescript": "^5.9.3",
-  "@vscode/test-cli": "^0.0.11",
-  "@vscode/test-electron": "^2.5.2"
- }
+    "@babel/parser": "^7.23.0",
+    "@babel/traverse": "^7.23.0",
+    "@babel/types": "^7.23.0",
+    "chokidar": "^3.5.0",
+    "compute-baseline": "^0.4.0",
+    "glob": "^10.3.0",
+    "minimatch": "^9.0.0",
+    "postcss": "^8.4.0",
+    "postcss-selector-parser": "^6.0.0",
+    "postcss-value-parser": "^4.2.0",
+    "web-features": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.104.0",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.25.10",
+    "eslint": "^9.36.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.9.3",
+    "undici-types": "^7.16.0"
+  }
 }

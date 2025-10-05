@@ -2,8 +2,8 @@ import { parse } from "@babel/parser";
 import traverse, { NodePath } from "@babel/traverse";
 import * as t from "@babel/types";
 import postcss, { Rule, Declaration, AtRule } from "postcss";
-import selectorParser from "postcss-selector-parser";
-import valueParser from "postcss-value-parser";
+import * as selectorParser from 'postcss-selector-parser';
+import * as valueParser from 'postcss-value-parser';
 
 export interface ParsedFeature {
     api: string;
