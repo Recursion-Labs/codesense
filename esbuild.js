@@ -23,6 +23,8 @@ const esbuildProblemMatcherPlugin = {
 	},
 };
 
+
+
 async function main() {
 	// Build extension
 	const extensionCtx = await esbuild.context({
@@ -36,7 +38,11 @@ async function main() {
 		sourcesContent: false,
 		platform: 'node',
 		outfile: 'dist/extension.js',
+
 		external: ['vscode'],
+		define: {
+			'import.meta.url': JSON.stringify('file://' + __filename),
+		},
 		logLevel: 'silent',
 		plugins: [
 			esbuildProblemMatcherPlugin,
@@ -55,6 +61,11 @@ async function main() {
 		sourcesContent: false,
 		platform: 'node',
 		outfile: 'dist/cli.js',
+
+		external: ['chokidar'],
+		define: {
+			'import.meta.url': JSON.stringify('file://' + __filename),
+		},
 		banner: {
 			js: '#!/usr/bin/env node'
 		},

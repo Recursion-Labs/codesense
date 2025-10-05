@@ -2,8 +2,8 @@ import { parse } from "@babel/parser";
 import traverse, { NodePath } from "@babel/traverse";
 import * as t from "@babel/types";
 import postcss, { Rule, Declaration, AtRule } from "postcss";
-import * as selectorParser from 'postcss-selector-parser';
-import * as valueParser from 'postcss-value-parser';
+import selectorParser from 'postcss-selector-parser';
+import valueParser from 'postcss-value-parser';
 
 export interface ParsedFeature {
     api: string;
@@ -62,6 +62,13 @@ export async function parseJavaScript(content: string, filePath: string): Promis
                         column: node.loc?.start.column,
                         context: memberExpr
                     });
+                } else if (t.isIdentifier(node.object) && isGlobalAPI(node.object.name)) {
+                    features.push({
+                        api: node.object.name,
+                        line: node.loc?.start.line,
+                        column: node.loc?.start.column,
+                        context: memberExpr
+                    });
                 }
             },
 
@@ -110,61 +117,74 @@ export async function parseCSS(content: string, filePath: string): Promise<Parse
     try {
         const root = postcss.parse(content, { from: filePath });
         
-        root.walkRules((rule: Rule) => {
-            // Parse selectors
-            try {
-                selectorParser((selectors: any) => {
-                    selectors.walkPseudos((pseudo: any) => {
-                        if (pseudo.value.startsWith(':')) {
+        try {
+            root.walkRules((rule: Rule) => {
+                // Parse selectors
+                try {
+                    const processor = selectorParser((selectors: any) => {
+                        selectors.walkPseudos((pseudo: any) => {
+                            if (pseudo.value.startsWith(':')) {
+                                features.push({
+                                    api: `css-pseudo-${pseudo.value.slice(1)}`,
+                                    line: rule.source?.start?.line,
+                                    column: rule.source?.start?.column,
+                                    context: pseudo.value
+                                });
+                            }
+                        });
+                    });
+                    processor.processSync(rule.selector);
+                } catch (e) {
+                    // Ignore selector parsing errors
+                }
+            });
+        } catch (e) {
+            console.warn(`Failed to walk CSS rules in ${filePath}:`, e);
+        }
+
+        try {
+            root.walkDecls((decl: Declaration) => {
+                // CSS Properties
+                features.push({
+                    api: `css-property-${decl.prop}`,
+                    line: decl.source?.start?.line,
+                    column: decl.source?.start?.column,
+                    context: `${decl.prop}: ${decl.value}`
+                });
+
+                // CSS Values
+                try {
+                    const parsed = valueParser(decl.value);
+                    parsed.walk((node: any) => {
+                        if (node.type === 'function') {
                             features.push({
-                                api: `css-pseudo-${pseudo.value.slice(1)}`,
-                                line: rule.source?.start?.line,
-                                column: rule.source?.start?.column,
-                                context: pseudo.value
+                                api: `css-function-${node.value}`,
+                                line: decl.source?.start?.line,
+                                column: decl.source?.start?.column,
+                                context: `${node.value}()`
                             });
                         }
                     });
-                }).processSync(rule.selector);
-            } catch (e) {
-                // Ignore selector parsing errors
-            }
-        });
-
-        root.walkDecls((decl: Declaration) => {
-            // CSS Properties
-            features.push({
-                api: `css-property-${decl.prop}`,
-                line: decl.source?.start?.line,
-                column: decl.source?.start?.column,
-                context: `${decl.prop}: ${decl.value}`
+                } catch (e) {
+                    // Ignore value parsing errors
+                }
             });
+        } catch (e) {
+            console.warn(`Failed to walk CSS declarations in ${filePath}:`, e);
+        }
 
-            // CSS Values
-            try {
-                const parsed = valueParser(decl.value);
-                parsed.walk((node: any) => {
-                    if (node.type === 'function') {
-                        features.push({
-                            api: `css-function-${node.value}`,
-                            line: decl.source?.start?.line,
-                            column: decl.source?.start?.column,
-                            context: `${node.value}()`
-                        });
-                    }
+        try {
+            root.walkAtRules((atRule: AtRule) => {
+                features.push({
+                    api: `css-at-rule-${atRule.name}`,
+                    line: atRule.source?.start?.line,
+                    column: atRule.source?.start?.column,
+                    context: `@${atRule.name}`
                 });
-            } catch (e) {
-                // Ignore value parsing errors
-            }
-        });
-
-        root.walkAtRules((atRule: AtRule) => {
-            features.push({
-                api: `css-at-rule-${atRule.name}`,
-                line: atRule.source?.start?.line,
-                column: atRule.source?.start?.column,
-                context: `@${atRule.name}`
             });
-        });
+        } catch (e) {
+            console.warn(`Failed to walk CSS at-rules in ${filePath}:`, e);
+        }
 
     } catch (error) {
         console.warn(`Failed to parse CSS in ${filePath}:`, error);
@@ -204,7 +224,7 @@ export async function parseHTML(content: string, filePath: string): Promise<Pars
         }
 
         // HTML attributes
-        const attributeRegex = /(\w+)=["'][^"']*["']/g;
+        const attributeRegex = /([\w-]+)(?:=(?:["'][^"']*["']|[^>\s]+))?/g;
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
             let attrMatch;
@@ -237,6 +257,9 @@ function getMemberExpressionString(node: t.MemberExpression): string {
     }
     if (t.isMemberExpression(node.object) && t.isIdentifier(node.property)) {
         return `${getMemberExpressionString(node.object)}.${node.property.name}`;
+    }
+    if (t.isIdentifier(node.object)) {
+        return node.object.name;
     }
     return '';
 }

@@ -1,5 +1,7 @@
-import { features } from "web-features";
-import { baseline } from "compute-baseline";
+import features from "web-features/data.json";
+import * as computeBaseline from "compute-baseline";
+import { Compat } from "../node_modules/compute-baseline/dist/browser-compat-data/compat.js";
+import bcd from "@mdn/browser-compat-data";
 import { BaselineInfo, BaselineStatus } from "./@types/scanner";
 
 function formatStatus(status: "high" | "low" | false | undefined): BaselineStatus {
@@ -16,39 +18,11 @@ function localCheck(api: string): BaselineInfo | null {
   if (directFeature?.status?.baseline !== undefined) {
     return {
       status: formatStatus(directFeature.status.baseline),
-      lowDate: directFeature.status.baseline_low_date,
-      highDate: directFeature.status.baseline_high_date,
+      lowDate: directFeature.status.baseline_low_date ?? undefined,
+      highDate: directFeature.status.baseline_high_date ?? undefined,
       support: directFeature.status.support,
       description: directFeature.description,
       spec: directFeature.spec
-    };
-  }
-
-  // Fuzzy search through all features
-  const matchingFeature = Object.entries(features).find(([key, feature]: [string, any]) => {
-    const searchTerms = [
-      key.toLowerCase(),
-      feature.name?.toLowerCase(),
-      ...(feature.compat_features || []).map((cf: string) => cf.toLowerCase())
-    ].filter(Boolean);
-    
-    const normalizedApi = normalizeApiName(api);
-    return searchTerms.some(term => 
-      term.includes(normalizedApi) || 
-      normalizedApi.includes(term) ||
-      levenshteinDistance(term, normalizedApi) <= 2
-    );
-  });
-
-  if (matchingFeature) {
-    const [, feature] = matchingFeature as [string, any];
-    return {
-      status: formatStatus(feature.status?.baseline),
-      lowDate: feature.status?.baseline_low_date,
-      highDate: feature.status?.baseline_high_date,
-      support: feature.status?.support,
-      description: feature.description,
-      spec: feature.spec
     };
   }
 
@@ -59,9 +33,13 @@ function localCheck(api: string): BaselineInfo | null {
 async function bcdCheck(api: string): Promise<BaselineInfo | null> {
   try {
     const bcdKey = mapApiToBCDKey(api);
+    console.log(`bcdKey for ${api}: ${bcdKey}`);
     if (!bcdKey) {return null;}
 
-    const status = baseline.computeBaseline({ compatKeys: [bcdKey] });
+    const compat = new Compat(bcd);
+    const status = computeBaseline.baseline.computeBaseline({ compatKeys: [bcdKey] }, compat);
+    console.log(`status for ${api}: ${JSON.stringify(status, null, 2)}`);
+    console.log(`status for ${api}: ${JSON.stringify(status)}`);
 
     if (status) {
       const support: Record<string, string> = {};
@@ -74,8 +52,8 @@ async function bcdCheck(api: string): Promise<BaselineInfo | null> {
       }
       return {
         status: formatStatus(status.baseline as any),
-        lowDate: status.baseline_low_date,
-        highDate: status.baseline_high_date,
+        lowDate: status.baseline_low_date ?? undefined,
+        highDate: status.baseline_high_date ?? undefined,
         support,
       };
     }
