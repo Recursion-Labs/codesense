@@ -44,7 +44,7 @@ async function localCheck(api: string): Promise<BaselineInfo | null> {
       key.toLowerCase(),
       feature.name?.toLowerCase(),
       ...(feature.compat_features || []).map((cf: string) => cf.toLowerCase())
-    ];
+    ].filter(term => term !== undefined);
     
     const normalizedApi = normalizeApiName(api);
     return searchTerms.some(term => 

@@ -36,7 +36,7 @@ async function main() {
 		sourcesContent: false,
 		platform: "node",
 		outfile: "dist/extension.cjs",
-		external: ["vscode"],
+		external: ["vscode", "web-features"],
 		logLevel: "silent",
 		plugins: [esbuildProblemMatcherPlugin],
 	});
