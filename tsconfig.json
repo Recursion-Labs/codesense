@@ -8,8 +8,10 @@
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
-    "forceConsistentCasingInFileNames": true
+    "moduleResolution": "bundler",
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
   },
   "include": ["src"]
 }

@@ -239,6 +239,4 @@ const CodeSenseESLintPlugin = {
 };
 
 export default CodeSenseESLintPlugin;
-
-// For CommonJS compatibility
-module.exports = CodeSenseESLintPlugin;
+export { CodeSenseESLintPlugin };

@@ -7,11 +7,29 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}"
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"${workspaceFolder}/example",
+				"${workspaceFolder}/example/index.js"
 			],
 			"outFiles": [
+				"${workspaceFolder}/dist/**/*.cjs",
 				"${workspaceFolder}/dist/**/*.js"
 			]
+		},
+		{
+			"name": "Test CodeSense Extension",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/out/test/index",
+				"${workspaceFolder}/example"
+			],
+			"outFiles": [
+				"${workspaceFolder}/out/test/**/*.js"
+			],
+			"preLaunchTask": "npm: compile"
 		}
 	]
 }
