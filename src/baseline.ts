@@ -1,5 +1,5 @@
 import { features } from "web-features";
-import { baseline } from "compute-baseline";
+import * as computeBaselinePkg from "compute-baseline";
 import { BaselineInfo, BaselineStatus } from "./@types/scanner";
 
 
@@ -64,7 +64,7 @@ async function bcdCheck(api: string): Promise<BaselineInfo | null> {
     const bcdKey = mapApiToBCDKey(api);
     if (!bcdKey) {return null;}
 
-    const status = baseline.computeBaseline({ compatKeys: [bcdKey] });
+    const status = computeBaselinePkg.baseline.computeBaseline({ compatKeys: [bcdKey] });
 
     if (status) {
       const support: Record<string, string> = {};
