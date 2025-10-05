@@ -2,9 +2,9 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { CompatibilityScanner, ScanOptions } from "./scanner";
 import { ReportGenerator, ReportOptions } from "./report";
-import { PolyfillManager } from "./polyfill";
 import { getBaselineInfo } from "./baseline";
 import { PolyfillConfig } from "./@types/cli";
+import { PolyfillManager } from "./polyfill";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 let scanner: CompatibilityScanner;

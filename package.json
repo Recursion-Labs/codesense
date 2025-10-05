@@ -124,7 +124,7 @@
     "@types/babel__traverse": "^7.28.0",
     "chokidar": "^3.5.0",
     "compute-baseline": "^0.4.0",
-    "glob": "^10.3.0",
+    "glob": "^11.0.3",
     "minimatch": "^9.0.0",
     "postcss": "^8.4.0",
     "postcss-selector-parser": "^6.0.0",
