@@ -247,7 +247,7 @@ function updateDiagnostics(results: any[]) {
     
     results.forEach(result => {
         const diagnostics = createDiagnosticsFromIssues(result.issues);
-        const uri = vscode.Uri.file(result.file);
+        const uri = vscode.Uri.file(result.filePath);
         diagnosticCollection.set(uri, diagnostics);
     });
 }
