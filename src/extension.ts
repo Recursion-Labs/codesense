@@ -12,6 +12,8 @@ let reportGenerator: ReportGenerator;
 let polyfillManager: PolyfillManager;
 
 export function activate(context: vscode.ExtensionContext) {
+
+    console.log("🚀 CodeSense extension.ts loaded!");
     console.log("✅ CodeSense activating...");
     
     // Check if we're in a test environment
@@ -54,14 +56,14 @@ export function activate(context: vscode.ExtensionContext) {
     ];
 
     // Register hover provider for baseline information
-    const hoverProvider = vscode.languages.registerHoverProvider(
-        ['javascript', 'typescript', 'css', 'html'],
-        new BaselineHoverProvider()
-    );
+    // const hoverProvider = vscode.languages.registerHoverProvider(
+    //     ['javascript', 'typescript', 'css', 'html'],
+    //     new BaselineHoverProvider()
+    // );
 
     context.subscriptions.push(
         diagnosticCollection,
-        hoverProvider,
+        // hoverProvider,
         ...commands,
         ...listeners
     );
@@ -69,6 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Initial scan if auto-scan is enabled and workspace is open
     // Disabled during testing to avoid hanging
     if (!isTestEnvironment && vscode.workspace.workspaceFolders && getConfiguration().get('autoScan', true)) {
+
         setTimeout(() => {
             scanProject().catch(err => {
                 console.error('Auto-scan failed:', err);
@@ -247,7 +250,7 @@ function updateDiagnostics(results: any[]) {
     
     results.forEach(result => {
         const diagnostics = createDiagnosticsFromIssues(result.issues);
-        const uri = vscode.Uri.file(result.file);
+        const uri = vscode.Uri.file(result.filePath);
         diagnosticCollection.set(uri, diagnostics);
     });
 }
