@@ -2,6 +2,7 @@
 
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 import { CompatibilityScanner, ScanOptions } from "./scanner.js";
 import { ReportGenerator, ReportOptions } from "./report.js";
 import { PolyfillManager } from "./polyfill.js";
@@ -258,7 +259,11 @@ Config file (CodeSense.config.json):
 }
 
 // Main execution
-if (require.main === module) {
+// Check if this module is being run directly (ES module equivalent of require.main === module)
+const isMainModule = import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || 
+                     import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'));
+
+if (isMainModule) {
     const options = parseArgs();
     const cli = new CodeSenseCLI(options);
     cli.run().catch(error => {

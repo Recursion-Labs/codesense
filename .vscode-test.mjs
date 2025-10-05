@@ -1,11 +1,16 @@
 import { defineConfig } from '@vscode/test-cli';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
 	files: 'out/test/**/*.test.js',
-	launchArgs: [
-		'--folder-uri', `file://${path.resolve('example')}`,
-		'--file', 'index.html',
-		'--file', 'index.js'
-	]
+	workspaceFolder: path.join(__dirname, 'example'),
+	launchArgs: ['--disable-extensions'],
+	mochaOptions: {
+		ui: 'tdd',
+		timeout: 10000,
+		grep: 'Baseline Test Suite'
+	}
 });
