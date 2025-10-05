@@ -3,13 +3,13 @@ import { computeBaseline } from "compute-baseline";
 import { BaselineInfo, BaselineStatus } from "./@types/scanner.js";
 
 // Lazy load web-features to avoid hanging on import
-let features: any = null;
+let webFeatures: any = null;
 async function getFeatures() {
-  if (!features) {
+  if (!webFeatures) {
     const { features: f } = await import("web-features");
-    features = f;
+    webFeatures = f;
   }
-  return features;
+  return webFeatures;
 }
 
 

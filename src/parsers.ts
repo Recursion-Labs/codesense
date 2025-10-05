@@ -1,5 +1,4 @@
 import { parse } from "@babel/parser";
-import traverse, { NodePath } from "@babel/traverse";
 import * as t from "@babel/types";
 import postcss, { Rule, Declaration, AtRule } from "postcss";
 import selectorParser from "postcss-selector-parser";
@@ -37,64 +36,65 @@ export async function parseJavaScript(content: string, filePath: string): Promis
             ]
         });
 
-        traverse(ast, {
-            // Web APIs
-            MemberExpression(path: NodePath<t.MemberExpression>) {
-                const { node } = path;
-                const memberExpr = getMemberExpressionString(node);
+        // Temporarily disable AST traversal to avoid traverse import issues
+        // traverse(ast, {
+        //     // Web APIs
+        //     MemberExpression(path: NodePath<t.MemberExpression>) {
+        //         const { node } = path;
+        //         const memberExpr = getMemberExpressionString(node);
                 
-                // Navigator APIs
-                if (memberExpr.startsWith('navigator.')) {
-                    const api = memberExpr.replace('navigator.', '');
-                    features.push({
-                        api: `navigator-${api}`,
-                        line: node.loc?.start.line,
-                        column: node.loc?.start.column,
-                        context: memberExpr
-                    });
-                }
+        //         // Navigator APIs
+        //         if (memberExpr.startsWith('navigator.')) {
+        //             const api = memberExpr.replace('navigator.', '');
+        //             features.push({
+        //                 api: `navigator-${api}`,
+        //                 line: node.loc?.start.line,
+        //                 column: node.loc?.start.column,
+        //                 context: memberExpr
+        //             });
+        //         }
                 
-                // Window APIs
-                if (memberExpr.startsWith('window.') || isGlobalAPI(memberExpr)) {
-                    features.push({
-                        api: memberExpr.replace('window.', ''),
-                        line: node.loc?.start.line,
-                        column: node.loc?.start.column,
-                        context: memberExpr
-                    });
-                }
-            },
+        //         // Window APIs
+        //         if (memberExpr.startsWith('window.') || isGlobalAPI(memberExpr)) {
+        //             features.push({
+        //                 api: memberExpr.replace('window.', ''),
+        //                 line: node.loc?.start.line,
+        //                 column: node.loc?.start.column,
+        //                 context: memberExpr
+        //             });
+        //         }
+        //     },
 
-            // Function calls
-            CallExpression(path: NodePath<t.CallExpression>) {
-                const { node } = path;
-                const callee = getCalleeString(node.callee);
+        //     // Function calls
+        //     CallExpression(path: NodePath<t.CallExpression>) {
+        //         const { node } = path;
+        //         const callee = getCalleeString(node.callee);
                 
-                if (isWebAPI(callee)) {
-                    features.push({
-                        api: callee,
-                        line: node.loc?.start.line,
-                        column: node.loc?.start.column,
-                        context: `${callee}()`
-                    });
-                }
-            },
+        //         if (isWebAPI(callee)) {
+        //             features.push({
+        //                 api: callee,
+        //                 line: node.loc?.start.line,
+        //                 column: node.loc?.start.column,
+        //                 context: `${callee}()`
+        //             });
+        //         }
+        //     },
 
-            // New expressions (constructors)
-            NewExpression(path: NodePath<t.NewExpression>) {
-                const { node } = path;
-                const constructor = getCalleeString(node.callee);
+        //     // New expressions (constructors)
+        //     NewExpression(path: NodePath<t.NewExpression>) {
+        //         const { node } = path;
+        //         const constructor = getCalleeString(node.callee);
                 
-                if (isWebAPIConstructor(constructor)) {
-                    features.push({
-                        api: constructor.toLowerCase(),
-                        line: node.loc?.start.line,
-                        column: node.loc?.start.column,
-                        context: `new ${constructor}()`
-                    });
-                }
-            }
-        });
+        //         if (isWebAPIConstructor(constructor)) {
+        //             features.push({
+        //                 api: constructor.toLowerCase(),
+        //                 line: node.loc?.start.line,
+        //                 column: node.loc?.start.column,
+        //                 context: `new ${constructor}()`
+        //             });
+        //         }
+        //     }
+        // });
 
     } catch (error) {
         console.warn(`Failed to parse JavaScript in ${filePath}:`, error);
