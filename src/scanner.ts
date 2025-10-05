@@ -71,6 +71,7 @@ export class CompatibilityScanner {
             if (this.shouldReport(status)) {
                 issues.push({
                     feature: feature.api,
+                    api: feature.api,
                     status,
                     line: feature.line,
                     column: feature.column,

@@ -88,6 +88,7 @@ async function bcdCheck(api: string): Promise<BaselineInfo | null> {
       }
     }
   } catch (error) {
+    console.log(error);
     // Silently fail for BCD lookup
   }
   return null;

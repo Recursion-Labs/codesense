@@ -14,6 +14,7 @@ suite('ReportGenerator Test Suite', () => {
             issues: [
                 {
                     feature: 'fetch',
+                    api: 'fetch',
                     status: '✅ Widely available',
                     line: 1,
                     column: 1,
@@ -28,6 +29,7 @@ suite('ReportGenerator Test Suite', () => {
             issues: [
                 {
                     feature: 'css-property-gap',
+                    api: 'css-property-gap',
                     status: '⚠️ Newly available',
                     line: 2,
                     column: 5,

@@ -190,15 +190,18 @@ export async function parseHTML(content: string, filePath: string): Promise<Pars
             let elementMatch;
             
             while ((elementMatch = elementRegex.exec(line)) !== null) {
-                const tagName = elementMatch[1].toLowerCase();
-                
-                if (isModernHTMLElement(tagName)) {
-                    features.push({
-                        api: `html-element-${tagName}`,
-                        line: i + 1,
-                        column: elementMatch.index,
-                        context: `<${tagName}>`
-                    });
+                const tagName = elementMatch[1];
+                if (tagName) {
+                    const lowerTagName = tagName.toLowerCase();
+                    
+                    if (isModernHTMLElement(lowerTagName)) {
+                        features.push({
+                            api: `html-element-${lowerTagName}`,
+                            line: i + 1,
+                            column: elementMatch.index,
+                            context: `<${tagName}>`
+                        });
+                    }
                 }
             }
         }
@@ -210,15 +213,18 @@ export async function parseHTML(content: string, filePath: string): Promise<Pars
             let attrMatch;
             
             while ((attrMatch = attributeRegex.exec(line)) !== null) {
-                const attrName = attrMatch[1].toLowerCase();
-                
-                if (isModernHTMLAttribute(attrName)) {
-                    features.push({
-                        api: `html-attribute-${attrName}`,
-                        line: i + 1,
-                        column: attrMatch.index,
-                        context: attrMatch[0]
-                    });
+                const attrName = attrMatch[1];
+                if (attrName) {
+                    const lowerAttrName = attrName.toLowerCase();
+                    
+                    if (isModernHTMLAttribute(lowerAttrName)) {
+                        features.push({
+                            api: `html-attribute-${lowerAttrName}`,
+                            line: i + 1,
+                            column: attrMatch.index,
+                            context: attrMatch[0]
+                        });
+                    }
                 }
             }
         }
