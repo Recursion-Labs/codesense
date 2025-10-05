@@ -4,8 +4,8 @@ import * as fs from "fs";
 import * as path from "path";
 import { CompatibilityScanner, ScanOptions } from "./scanner";
 import { ReportGenerator, ReportOptions } from "./report";
-import { PolyfillManager, PolyfillConfig } from "./polyfill";
-import type { CLIOptions } from "./@types/interface";
+import { PolyfillManager } from "./polyfill";
+import type { CLIOptions, PolyfillConfig } from "./@types/interface";
 
 class CodeSenseCLI {
     private options: CLIOptions;

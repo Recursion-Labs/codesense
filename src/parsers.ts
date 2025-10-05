@@ -241,13 +241,14 @@ function getMemberExpressionString(node: t.MemberExpression): string {
     return '';
 }
 
-function getCalleeString(callee: t.Expression): string {
+function getCalleeString(callee: t.Expression | t.V8IntrinsicIdentifier): string {
     if (t.isIdentifier(callee)) {
         return callee.name;
     }
     if (t.isMemberExpression(callee)) {
         return getMemberExpressionString(callee);
     }
+    // V8IntrinsicIdentifier is not a web API, so return empty string
     return '';
 }
 
