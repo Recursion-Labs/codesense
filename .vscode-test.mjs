@@ -7,10 +7,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
 	files: 'out/test/**/*.test.js',
 	workspaceFolder: path.join(__dirname, 'example'),
-	launchArgs: ['--disable-extensions'],
 	mochaOptions: {
 		ui: 'tdd',
 		timeout: 10000,
 		grep: 'Baseline Test Suite'
-	}
+	},
 });
