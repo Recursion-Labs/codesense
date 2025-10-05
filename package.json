@@ -1,5 +1,5 @@
 {
-  "name": "CodeSense",
+  "name": "codesense",
   "displayName": "CodeSense - Baseline Web Compatibility",
   "description": "Baseline-powered web compatibility scanner and polyfill manager for modern web development",
   "version": "0.1.0",
@@ -24,7 +24,7 @@
     "onLanguage:html",
     "onLanguage:css"
   ],
-  "main": "./dist/extension-simple.js",
+  "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
@@ -58,7 +58,7 @@
       "properties": {
         "CodeSense.autoScan": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Automatically scan files on save"
         },
         "CodeSense.baselineLevel": {
@@ -147,6 +147,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.18.8",
+    "@types/sinon": "^17.0.4",
     "@types/vscode": "^1.104.0",
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
@@ -155,6 +156,7 @@
     "esbuild": "^0.25.10",
     "eslint": "^9.37.0",
     "npm-run-all": "^4.1.5",
+    "sinon": "^21.0.0",
     "typescript": "^5.9.3"
   }
 }
