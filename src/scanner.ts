@@ -85,10 +85,8 @@ export class CompatibilityScanner {
         const summary = this.calculateSummary(issues);
 
         return {
-            file: filePath,
-            fileType,
+            filePath: filePath,
             issues,
-            summary
         };
     }
 

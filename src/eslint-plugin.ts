@@ -135,7 +135,7 @@ const baselineRule: Rule.RuleModule = {
                     suggestions.push({
                         messageId: "alternativeSuggestion",
                         data: { api, alternative },
-                        fix: null // Manual fix required
+                        fix: () => null // Manual fix required
                     });
                 }
             }

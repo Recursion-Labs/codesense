@@ -12,7 +12,12 @@ export const IssueSchema = z.object({
   id: z.string().optional(),
   feature: z.string().optional(),
   status: BaselineStatusSchema.optional(),
+  line: z.number().optional(),
+  column: z.number().optional(),
+  context: z.string().optional(),
   severity: z.enum(['low', 'medium', 'high']).optional(),
+  polyfillAvailable: z.boolean().optional(),
+  alternativeApi: z.string().optional(),
   message: z.string().optional(),
 });
 export type Issue = z.infer<typeof IssueSchema>;
