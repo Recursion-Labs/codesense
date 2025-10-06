@@ -174,41 +174,10 @@ CodeSense --include "src/**,lib/**"
     # Fail build if compatibility score < 80%
 ```
 
-## 🏗 Architecture
+## 📚 Documentation
 
-### Core Components
+For detailed documentation, please see the [docs](./docs) directory.
 
-1. **Scanner Engine** - AST parsing and feature detection
-2. **Baseline Checker** - Multi-source compatibility lookup
-3. **Report Generator** - Multi-format output with rich visualizations
-4. **Polyfill Manager** - Smart polyfill injection and recommendations
-5. **ESLint Integration** - Real-time linting with auto-fix suggestions
-
-### Data Sources
-
-- **web-features npm package** - Official Baseline feature database
-- **Web Platform Dashboard API** - Live compatibility status
-- **compute-baseline** - Granular BCD key analysis
-- **Built-in polyfill database** - Curated polyfill recommendations
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-```bash
-git clone https://github.com/your-org/CodeSense
-cd CodeSense
-npm install
-npm run compile
-```
-
-### Running Tests
-
-```bash
-npm test
-```
 
 ## 📄 License
 
