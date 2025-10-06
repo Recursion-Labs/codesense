@@ -97,6 +97,18 @@ To run the CodeSense CLI locally, follow these steps:
 A VS Code extension is also planned! You'll be able to install it from the marketplace and get real-time feedback in your editor.
 *   **[Link to VS Code Marketplace Extension (Coming Soon)]**
 
+## 📚 Documentation
+
+For detailed documentation, please see the [docs](./docs) directory. The documentation includes:
+
+*   [Getting Started](./docs/getting-started.md)
+*   [Installation](./docs/installation.md)
+*   [Usage](./docs/usage.md)
+*   [Configuration](./docs/configuration.md)
+*   [API Reference](./docs/api-reference.md)
+*   [Contributing](./docs/contributing.md)
+*   [Architecture](./docs/architecture.md)
+
 ## 🌟 Why CodeSense? (Our Vision)
 
 We believe that building for the web should be easier. Our vision is to create a tool that is:
@@ -117,8 +129,9 @@ You can read more about the concepts behind Baseline here:
 
 ## 🤝 Contributing
 
-We'd love your help! If you're interested in contributing, please check out our contributing guide (coming soon).
+We'd love your help! If you're interested in contributing, please check out our [contributing guide](./docs/contributing.md).
 
 ## 📄 License
 
 This project is licensed under the MIT License.
+
