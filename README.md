@@ -1,197 +1,137 @@
-# 🎯 CodeSense - Baseline Web Compatibility Tool
+# CodeSense
 
-**The first Baseline-native developer tool that makes web feature compatibility actionable in your workflow.**
+<p align="center">
+  <img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js">
+  <img src="https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+  <img src="https://img.shields.io/badge/babel-F9DC3E?style=for-the-badge&logo=babel&logoColor=black" alt="Babel">
+  <img src="https://img.shields.io/badge/postcss-DD3A0A?style=for-the-badge&logo=postcss&logoColor=white" alt="PostCSS">
+  <img src="https://img.shields.io/badge/eslint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white" alt="ESLint">
+  <img src="https://img.shields.io/badge/webpack-8DD6F9?style=for-the-badge&logo=webpack&logoColor=black" alt="Webpack">
+  <img src="https://img.shields.io/badge/react-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">
+  <img src="https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js">
+  <img src="https://img.shields.io/badge/github%20actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white" alt="GitHub Actions">
+  <img src="https://img.shields.io/badge/visual%20studio%20code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="VSCode">
+  <img src="https://img.shields.io/badge/google%20chrome-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Google Chrome">
 
-CodeSense automatically scans your codebase for modern web features, checks their Baseline compatibility status, and provides intelligent recommendations for polyfills and alternatives. Stop guessing about browser support—let CodeSense guide your decisions with official Baseline data.
+</p>
 
-## 🌟 Key Features
-
-### 🔍 **Intelligent Code Scanning**
-- **AST-based parsing** for JavaScript/TypeScript using Babel
-- **CSS feature detection** with PostCSS integration  
-- **HTML element and attribute analysis**
-- **Multi-file project scanning** with configurable patterns
-
-### 📊 **Official Baseline Integration**
-- Direct integration with the **web-features** npm package
-- **Web Platform Dashboard API** for live compatibility data
-- **compute-baseline** for granular BCD key lookups
-- Fuzzy matching and intelligent feature detection
-
-### 💉 **Smart Polyfill Management**
-- **Automatic polyfill recommendations** based on detected issues
-- **Multiple injection strategies**: CDN, inline, or external bundles
-- **Bundle size optimization** - only include what you need
-- **Package.json integration** for dependency management
-
-### 📈 **Comprehensive Reporting**
-- **Multiple formats**: Markdown, HTML, JSON, CSV
-- **Interactive HTML dashboards** with compatibility scores
-- **Detailed issue tracking** with line numbers and context
-- **Polyfill recommendations** and alternative API suggestions
-
-### 🛠 **Developer Experience**
-- **VS Code extension** with real-time diagnostics
-- **ESLint plugin** for inline warnings during development
-- **CLI tool** for CI/CD integration
-- **Watch mode** for continuous monitoring
-
-## 🚀 Quick Start
-
-### VS Code Extension
-
-1. Install the CodeSense extension from the VS Code marketplace
-2. Open your project in VS Code
-3. Run **"CodeSense: Scan Project"** from the command palette
-4. View compatibility issues in the Problems panel
-5. Generate detailed reports with **"CodeSense: Generate Report"**
-
-### CLI Tool
-
-```bash
-# Install globally
-npm install -g CodeSense
-
-# Scan current directory
-CodeSense
-
-# Scan specific path with HTML report
-CodeSense --path ./src --format html
-
-# Include polyfill recommendations
-CodeSense --polyfills --polyfill-strategy auto
-
-# Watch mode for continuous monitoring
-CodeSense --watch --verbose
-```
-
-### ESLint Plugin
-
-```javascript
-// eslint.config.js
-import CodeSense from 'eslint-plugin-CodeSense';
-
-export default [
-  {
-    plugins: { CodeSense },
-    rules: {
-      'CodeSense/baseline-compatibility': ['error', {
-        baselineLevel: 'newly',
-        reportUnknown: false
-      }]
-    }
-  }
-];
-```
-
-## 📋 Configuration
-
-### VS Code Settings
-
-```json
-{
-  "CodeSense.autoScan": true,
-  "CodeSense.baselineLevel": "newly",
-  "CodeSense.excludePatterns": ["node_modules/**", "dist/**"],
-  "CodeSense.polyfillStrategy": "manual"
-}
-```
-
-### CLI Configuration File (`CodeSense.config.json`)
-
-```json
-{
-  "baseline": "newly",
-  "exclude": ["node_modules/**", "dist/**", "build/**"],
-  "include": ["src/**/*.{js,ts,jsx,tsx,css,html}"],
-  "format": "html",
-  "polyfills": true,
-  "polyfillStrategy": "auto",
-  "verbose": true
-}
-```
-
-## 🎯 Baseline Levels
-
-- **`widely`** - Only flag features with Limited availability (strictest)
-- **`newly`** - Flag Limited + Newly available features (recommended)
-- **`all`** - Report all detected features including Widely available
-
-## 📊 Example Output
-
-### CLI Summary
-```
-🔍 Scanning /project for baseline compatibility...
-📊 Summary:
-   Compatibility Score: 87%
-   ✅ Widely Available: 45
-   ⚠️ Newly Available: 8
-   ❌ Limited Support: 3
-   ❓ Unknown: 1
-
-⚠️ Warning: 3 features have limited browser support
-```
-
-### HTML Report Features
-- **Interactive compatibility score gauge**
-- **Detailed issue breakdown by file**
-- **Polyfill recommendations with package info**
-- **Alternative API suggestions**
-- **Sortable and filterable results**
-
-## 🔧 Advanced Usage
-
-### Polyfill Injection Strategies
-
-```javascript
-// Auto-inject polyfills
-CodeSense --polyfill-strategy auto
-
-// Manual recommendations only
-CodeSense --polyfill-strategy manual
-
-// Disable polyfill features
-CodeSense --polyfill-strategy disabled
-```
-
-### Custom Exclude Patterns
-
-```bash
-# Exclude test files and documentation
-CodeSense --exclude "**/*.test.js,**/*.spec.ts,docs/**"
-
-# Include only specific directories
-CodeSense --include "src/**,lib/**"
-```
-
-### CI/CD Integration
-
-```yaml
-# GitHub Actions example
-- name: Check Web Compatibility
-  run: |
-    npx CodeSense --format json --output compatibility-report.json
-    # Fail build if compatibility score < 80%
-```
-
-## 📚 Documentation
-
-For detailed documentation, please see the [docs](./docs) directory.
-
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **WebDX Community Group** for the Baseline initiative
-- **web-features project** for the comprehensive feature database
-- **MDN** and **BCD** for browser compatibility data
-- **Chrome team** for pioneering the Baseline concept
+<p align="center">
+  <strong>CodeSense turns Baseline documentation into a tool that keeps your web app future-proof.</strong>
+</p>
 
 ---
 
-**Made with ❤️ for the web development community**
+## The Problem
 
-*Stop guessing about browser support. Start building with confidence.*
+Ever found yourself asking: **"Can I actually use this cool new web feature in my project?"**
+
+If you're a web developer, you know the drill. You end up juggling a dozen tabs—MDN, CanIUse, blog posts, compatibility tables—just to figure out if a feature is safe to use. It's a mess.
+
+This broken workflow leads to:
+*   **Over-polyfilling:** Bloating your app with unnecessary code, "just in case."
+*   **Under-polyfilling:** Shipping code that breaks on older browsers, leading to angry users.
+*   **Lost Productivity:** Wasting precious time on manual research instead of building.
+
+This uncertainty is a tax on every web developer's productivity.
+
+## Our Solution
+
+**CodeSense** is here to fix that. It's a developer tool powered by [Baseline](https://web.dev/baseline) that makes web feature compatibility an automated part of your workflow.
+
+Here’s what it does:
+*   **Scans your code** to see which modern web features you're using.
+*   **Checks their Baseline compatibility status** using official, up-to-date data.
+*   **Helps you decide** if a polyfill is needed, and can even inject it for you.
+*   **Warns you early**—right in your IDE, linter, or CI/CD pipeline.
+*   **Generates reports and AI-powered suggestions** to help you write future-proof code.
+
+In short, **CodeSense makes Baseline data actionable inside your workflow.**
+
+## ✨ Key Features
+
+### MVP (Ready to Go)
+*   **💻 Code Scanner (CLI):** A command-line tool that scans your project, detects the web APIs you're using, and flags any that aren't Baseline-compatible.
+*   **📊 Baseline Check:** Uses the official `web-features` npm package and the Web Platform Dashboard API to give you a clear status for each feature:
+    *   ✅ **Safe:** Widely supported.
+    *   ⚠️ **Partial:** Newly available and might need checking.
+    *   ❌ **Not Baseline:** Risky, needs a polyfill.
+*   **📄 Report Generator:** Generates simple CLI output, as well as detailed Markdown and HTML reports showing your project's Baseline compliance percentage and any risky features.
+
+### Advanced (What's Coming Next)
+*   **✍️ ESLint Plugin:** Get inline warnings right in your code as you type.
+*   **💉 Smart Polyfill Injection:** Automatically add only the polyfills you need, right when you need them, using Babel.
+*   **🚀 CI/CD Integration:** A GitHub Action that can block deployments if unsafe features are found, acting as a guardrail for your production builds.
+*   **🤖 AI Suggestions:** Recommends Baseline-safe alternatives for any risky features you're using.
+*   **📈 Dashboard UI:** A visual dashboard with charts and graphs to show your project's compliance over time.
+
+## 🚀 Getting Started
+
+> **Note:** This project is currently under development. The CLI tool is not yet published to npm.
+
+To run the CodeSense CLI locally, follow these steps:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Recursion-Labs/codesense.git
+    cd codesense
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Build the CLI:**
+    ```bash
+    npm run build:cli
+    ```
+    *(Note: The build is currently facing some issues. We're working on fixing them!)*
+
+4.  **Run the CLI:**
+    ```bash
+    node dist/cli.js
+    ```
+
+### VS Code Extension
+A VS Code extension is also planned! You'll be able to install it from the marketplace and get real-time feedback in your editor.
+*   **[Link to VS Code Marketplace Extension (Coming Soon)]**
+
+## 📚 Documentation
+
+For detailed documentation, please see the [docs](./docs) directory. The documentation includes:
+
+*   [Getting Started](./docs/getting-started.md)
+*   [Installation](./docs/installation.md)
+*   [Usage](./docs/usage.md)
+*   [Configuration](./docs/configuration.md)
+*   [API Reference](./docs/api-reference.md)
+*   [Contributing](./docs/contributing.md)
+*   [Architecture](./docs/architecture.md)
+
+## 🌟 Why CodeSense? (Our Vision)
+
+We believe that building for the web should be easier. Our vision is to create a tool that is:
+
+*   **Baseline Native:** The first tool of its kind to directly integrate with the official Baseline data sources.
+*   **End-to-End:** Covering your entire workflow, from writing code in your IDE to building and deploying with CI/CD.
+*   **Smart:** Reducing your bundle size by avoiding unnecessary polyfills and giving you intelligent suggestions.
+*   **Future-Proof:** Helping you understand when features will become part of Baseline, so you can plan for the future.
+*   **Team-Ready:** With compliance badges, CI/CD guardrails, and shareable reports, it's built for teams of all sizes.
+
+## 🏆 Hackathon Project
+
+This project was created for the **[Baseline Devpost Hackathon](https://baseline.devpost.com/)**.
+
+You can read more about the concepts behind Baseline here:
+*   [The Web Platform Dashboard](https://web.dev/articles/web-platform-dashboard-baseline)
+*   [Making web platform features more stable with Baseline](https://web.dev/articles/baseline-tools-web-features)
+
+## 🤝 Contributing
+
+We'd love your help! If you're interested in contributing, please check out our [contributing guide](./docs/contributing.md).
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
