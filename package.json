@@ -1,9 +1,14 @@
 {
-  "name": "CodeSense",
+  "name": "codesense",
   "displayName": "CodeSense - Baseline Web Compatibility",
   "description": "Baseline-powered web compatibility scanner and polyfill manager for modern web development",
   "version": "0.1.0",
   "type": "module",
+  "publisher": "Recursion-Labs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Recursion-Labs/codesense"
+  },
   "engines": {
     "vscode": "^1.104.0"
   },
@@ -19,12 +24,9 @@
     "browser-support"
   ],
   "activationEvents": [
-    "onLanguage:javascript",
-    "onLanguage:typescript",
-    "onLanguage:html",
-    "onLanguage:css"
+    "onStartupFinished"
   ],
-  "main": "./dist/extension-simple.js",
+  "main": "./dist/extension.cjs",
   "contributes": {
     "commands": [
       {
@@ -58,12 +60,16 @@
       "properties": {
         "CodeSense.autoScan": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Automatically scan files on save"
         },
         "CodeSense.baselineLevel": {
           "type": "string",
-          "enum": ["widely", "newly", "all"],
+          "enum": [
+            "widely",
+            "newly",
+            "all"
+          ],
           "default": "newly",
           "description": "Minimum Baseline level to consider safe"
         },
@@ -72,12 +78,20 @@
           "items": {
             "type": "string"
           },
-          "default": ["node_modules/**", "dist/**", "build/**"],
+          "default": [
+            "node_modules/**",
+            "dist/**",
+            "build/**"
+          ],
           "description": "File patterns to exclude from scanning"
         },
         "CodeSense.polyfillStrategy": {
           "type": "string",
-          "enum": ["auto", "manual", "disabled"],
+          "enum": [
+            "auto",
+            "manual",
+            "disabled"
+          ],
           "default": "manual",
           "description": "Polyfill injection strategy"
         }
@@ -108,8 +122,8 @@
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "package": "npm run check-types && npm run lint && node esbuild.js --production",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
+    "compile-tests": "tsc -p tsconfig.test.json",
+    "watch-tests": "tsc -p tsconfig.test.json -w",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
     "lint": "eslint src",
@@ -117,31 +131,35 @@
     "build:cli": "tsc src/cli.ts --outDir dist --target ES2020 --module commonjs",
     "prepublishOnly": "npm run package && npm run build:cli"
   },
-
   "dependencies": {
-  "compute-baseline": "^0.4.0",
-  "web-features": "^3.3.0",
-  "@babel/parser": "^7.23.0",
-  "@babel/traverse": "^7.23.0",
-  "@babel/types": "^7.23.0",
-  "postcss": "^8.4.0",
-  "postcss-selector-parser": "^6.0.0",
-  "postcss-value-parser": "^4.2.0",
-  "glob": "^10.3.0",
-  "minimatch": "^9.0.0",
-  "chokidar": "^3.5.0"
-},
-"devDependencies": {
-  "@types/vscode": "^1.104.0",
-  "@types/mocha": "^10.0.10",
-  "@types/node": "22.x",
-  "@typescript-eslint/eslint-plugin": "^8.45.0",
-  "@typescript-eslint/parser": "^8.45.0",
-  "eslint": "^9.36.0",
-  "esbuild": "^0.25.10",
-  "npm-run-all": "^4.1.5",
-  "typescript": "^5.9.3",
-  "@vscode/test-cli": "^0.0.11",
-  "@vscode/test-electron": "^2.5.2"
- }
+    "@babel/parser": "^7.28.4",
+    "@babel/traverse": "^7.28.4",
+    "@babel/types": "^7.28.4",
+    "@types/babel__traverse": "^7.28.0",
+    "chokidar": "^3.6.0",
+    "compute-baseline": "^0.4.0",
+    "glob": "^11.0.3",
+    "minimatch": "^9.0.5",
+    "postcss": "^8.5.6",
+    "postcss-selector-parser": "^6.1.2",
+    "postcss-value-parser": "^4.2.0",
+    "web-features": "^3.3.0",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.18.8",
+    "@types/sinon": "^17.0.4",
+    "@types/vscode": "^1.104.0",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.6.2",
+    "esbuild": "^0.25.10",
+    "eslint": "^9.37.0",
+    "npm-run-all": "^4.1.5",
+    "sinon": "^21.0.0",
+    "typescript": "^5.9.3"
+  }
 }

@@ -1,31 +1,30 @@
 import { features } from "web-features";
-import { getStatus } from "compute-baseline";
+import { computeBaseline } from "compute-baseline";
+import { BaselineInfo, BaselineStatus } from "./@types/scanner.js";
 
-export type BaselineStatus =
-  | "✅ Widely available"
-  | "⚠️ Newly available"
-  | "❌ Limited"
-  | "❓ Unknown";
-
-export interface BaselineInfo {
-  status: BaselineStatus;
-  lowDate?: string;
-  highDate?: string;
-  support?: Record<string, string>;
-  description?: string;
-  spec?: string;
-  mdn?: string;
+// Lazy load web-features to avoid hanging on import
+let webFeatures: any = null;
+async function getFeatures() {
+  if (!webFeatures) {
+    const { features: f } = await import("web-features");
+    webFeatures = f;
+  }
+  return webFeatures;
 }
 
+
+
+
 function formatStatus(status: "high" | "low" | false | undefined): BaselineStatus {
-  if (status === "high") return "✅ Widely available";
-  if (status === "low") return "⚠️ Newly available";
-  if (status === false) return "❌ Limited";
+  if (status === "high") {return "✅ Widely available";}
+  if (status === "low") {return "⚠️ Newly available";}
+  if (status === false) {return "❌ Limited";}
   return "❓ Unknown";
 }
 
 // Enhanced local lookup using `web-features`
-function localCheck(api: string): BaselineInfo | null {
+async function localCheck(api: string): Promise<BaselineInfo | null> {
+  const features = await getFeatures();
   // Direct feature lookup
   const directFeature = features[api as keyof typeof features] as any;
   if (directFeature?.status?.baseline !== undefined) {
@@ -45,7 +44,7 @@ function localCheck(api: string): BaselineInfo | null {
       key.toLowerCase(),
       feature.name?.toLowerCase(),
       ...(feature.compat_features || []).map((cf: string) => cf.toLowerCase())
-    ];
+    ].filter(term => term !== undefined);
     
     const normalizedApi = normalizeApiName(api);
     return searchTerms.some(term => 
@@ -74,18 +73,22 @@ function localCheck(api: string): BaselineInfo | null {
 async function bcdCheck(api: string): Promise<BaselineInfo | null> {
   try {
     const bcdKey = mapApiToBCDKey(api);
-    if (!bcdKey) return null;
+    if (!bcdKey) {return null;}
 
-    const status = getStatus(null, bcdKey);
+    const status = computeBaseline({ compatKeys: [bcdKey] });
+
     if (status) {
-      return {
-        status: formatStatus(status.baseline as any),
-        lowDate: status.baseline_low_date,
-        highDate: status.baseline_high_date,
-        support: status.support
-      };
+      const support: Record<string, string> = {};
+      if (status.support) {
+        for (const [browser, initialSupport] of status.support) {
+          if (initialSupport) {
+            support[browser.name] = initialSupport.release.version;
+          }
+        }
+      }
     }
   } catch (error) {
+    console.log(error);
     // Silently fail for BCD lookup
   }
   return null;
@@ -101,35 +104,50 @@ async function remoteCheck(api: string): Promise<BaselineInfo | null> {
     ];
 
     for (const query of queries) {
-      const resp = await fetch(`https://api.webstatus.dev/v1/features?q=${encodeURIComponent(query)}`);
-      if (!resp.ok) continue;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
 
-      const result = await resp.json() as {
-        data: Array<{ 
-          baseline?: { 
-            status?: "widely" | "newly" | "limited";
-            low_date?: string;
-            high_date?: string;
-          };
-          name?: string;
-          feature_id?: string;
-          spec?: { links?: Array<{ url: string }> };
-        }>;
-      };
+      try {
+        const resp = await fetch(`https://api.webstatus.dev/v1/features?q=${encodeURIComponent(query)}`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (!resp.ok) {continue;}
 
-      if (result.data?.length) {
-        const feature = result.data[0];
-        const baselineStatus = feature.baseline?.status;
-        
-        if (baselineStatus) {
-          return {
-            status: formatStatus(baselineStatus === "widely" ? "high" : 
-                              baselineStatus === "newly" ? "low" : false),
-            lowDate: feature.baseline?.low_date,
-            highDate: feature.baseline?.high_date,
-            description: feature.name,
-            spec: feature.spec?.links?.[0]?.url
-          };
+        const result = await resp.json() as {
+          data: Array<{ 
+            baseline?: { 
+              status?: "widely" | "newly" | "limited";
+              low_date?: string;
+              high_date?: string;
+            };
+            name?: string;
+            feature_id?: string;
+            spec?: { links?: Array<{ url: string }> };
+          }>;
+        };
+
+        if (result.data?.length) {
+          const feature = result.data[0];
+          const baselineStatus = feature.baseline?.status;
+          
+          if (baselineStatus) {
+            return {
+              status: formatStatus(baselineStatus === "widely" ? "high" : 
+                                baselineStatus === "newly" ? "low" : false),
+              lowDate: feature.baseline?.low_date,
+              highDate: feature.baseline?.high_date,
+              description: feature.name,
+              spec: feature.spec?.links?.[0]?.url
+            };
+          }
+        }
+      } catch (error) {
+        clearTimeout(timeoutId);
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.warn('Remote baseline check timed out');
+        } else {
+          throw error;
         }
       }
     }
@@ -147,11 +165,13 @@ export async function baselineCheck(api: string): Promise<BaselineStatus> {
 
 export async function getBaselineInfo(api: string): Promise<BaselineInfo> {
   // Try local lookup first (fastest)
-  const local = localCheck(api);
-  if (local && local.status !== "❓ Unknown") {
+  const local = await localCheck(api);
+  if (local) {
     return local;
   }
 
+  // Skip BCD and remote for now to avoid hangs
+  /*
   // Try BCD lookup
   const bcd = await bcdCheck(api);
   if (bcd && bcd.status !== "❓ Unknown") {
@@ -163,6 +183,7 @@ export async function getBaselineInfo(api: string): Promise<BaselineInfo> {
   if (remote && remote.status !== "❓ Unknown") {
     return remote;
   }
+  */
 
   return {
     status: "❓ Unknown",
@@ -213,8 +234,8 @@ function mapApiToBCDKey(api: string): string | null {
 function levenshteinDistance(str1: string, str2: string): number {
   const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
 
-  for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
-  for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+  for (let i = 0; i <= str1.length; i++) {matrix[0][i] = i;}
+  for (let j = 0; j <= str2.length; j++) {matrix[j][0] = j;}
 
   for (let j = 1; j <= str2.length; j++) {
     for (let i = 1; i <= str1.length; i++) {

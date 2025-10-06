@@ -2,23 +2,11 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import { CompatibilityScanner, ScanOptions } from "./scanner";
-import { ReportGenerator, ReportOptions } from "./report";
-import { PolyfillManager, PolyfillConfig } from "./polyfill";
-
-interface CLIOptions {
-    path?: string;
-    format?: 'markdown' | 'html' | 'json' | 'csv';
-    output?: string;
-    exclude?: string[];
-    include?: string[];
-    baseline?: 'widely' | 'newly' | 'all';
-    polyfills?: boolean;
-    polyfillStrategy?: 'auto' | 'manual' | 'disabled';
-    verbose?: boolean;
-    watch?: boolean;
-    config?: string;
-}
+import { fileURLToPath } from "url";
+import { CompatibilityScanner, ScanOptions } from "./scanner.js";
+import { ReportGenerator, ReportOptions } from "./report.js";
+import { PolyfillManager } from "./polyfill.js";
+import type { CLIOptions, PolyfillConfig } from "./@types/interface.js";
 
 class CodeSenseCLI {
     private options: CLIOptions;
@@ -226,7 +214,6 @@ function parseArgs(): CLIOptions {
             case '--help':
             case '-h':
                 printHelp();
-                process.exit(0);
                 break;
         }
     }
@@ -272,7 +259,11 @@ Config file (CodeSense.config.json):
 }
 
 // Main execution
-if (require.main === module) {
+// Check if this module is being run directly (ES module equivalent of require.main === module)
+const isMainModule = import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || 
+                     import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'));
+
+if (isMainModule) {
     const options = parseArgs();
     const cli = new CodeSenseCLI(options);
     cli.run().catch(error => {

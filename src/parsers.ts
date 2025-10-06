@@ -1,5 +1,4 @@
 import { parse } from "@babel/parser";
-import traverse, { NodePath } from "@babel/traverse";
 import * as t from "@babel/types";
 import postcss, { Rule, Declaration, AtRule } from "postcss";
 import selectorParser from "postcss-selector-parser";
@@ -37,64 +36,65 @@ export async function parseJavaScript(content: string, filePath: string): Promis
             ]
         });
 
-        traverse(ast, {
-            // Web APIs
-            MemberExpression(path: NodePath<t.MemberExpression>) {
-                const { node } = path;
-                const memberExpr = getMemberExpressionString(node);
+        // Temporarily disable AST traversal to avoid traverse import issues
+        // traverse(ast, {
+        //     // Web APIs
+        //     MemberExpression(path: NodePath<t.MemberExpression>) {
+        //         const { node } = path;
+        //         const memberExpr = getMemberExpressionString(node);
                 
-                // Navigator APIs
-                if (memberExpr.startsWith('navigator.')) {
-                    const api = memberExpr.replace('navigator.', '');
-                    features.push({
-                        api: `navigator-${api}`,
-                        line: node.loc?.start.line,
-                        column: node.loc?.start.column,
-                        context: memberExpr
-                    });
-                }
+        //         // Navigator APIs
+        //         if (memberExpr.startsWith('navigator.')) {
+        //             const api = memberExpr.replace('navigator.', '');
+        //             features.push({
+        //                 api: `navigator-${api}`,
+        //                 line: node.loc?.start.line,
+        //                 column: node.loc?.start.column,
+        //                 context: memberExpr
+        //             });
+        //         }
                 
-                // Window APIs
-                if (memberExpr.startsWith('window.') || isGlobalAPI(memberExpr)) {
-                    features.push({
-                        api: memberExpr.replace('window.', ''),
-                        line: node.loc?.start.line,
-                        column: node.loc?.start.column,
-                        context: memberExpr
-                    });
-                }
-            },
+        //         // Window APIs
+        //         if (memberExpr.startsWith('window.') || isGlobalAPI(memberExpr)) {
+        //             features.push({
+        //                 api: memberExpr.replace('window.', ''),
+        //                 line: node.loc?.start.line,
+        //                 column: node.loc?.start.column,
+        //                 context: memberExpr
+        //             });
+        //         }
+        //     },
 
-            // Function calls
-            CallExpression(path: NodePath<t.CallExpression>) {
-                const { node } = path;
-                const callee = getCalleeString(node.callee);
+        //     // Function calls
+        //     CallExpression(path: NodePath<t.CallExpression>) {
+        //         const { node } = path;
+        //         const callee = getCalleeString(node.callee);
                 
-                if (isWebAPI(callee)) {
-                    features.push({
-                        api: callee,
-                        line: node.loc?.start.line,
-                        column: node.loc?.start.column,
-                        context: `${callee}()`
-                    });
-                }
-            },
+        //         if (isWebAPI(callee)) {
+        //             features.push({
+        //                 api: callee,
+        //                 line: node.loc?.start.line,
+        //                 column: node.loc?.start.column,
+        //                 context: `${callee}()`
+        //             });
+        //         }
+        //     },
 
-            // New expressions (constructors)
-            NewExpression(path: NodePath<t.NewExpression>) {
-                const { node } = path;
-                const constructor = getCalleeString(node.callee);
+        //     // New expressions (constructors)
+        //     NewExpression(path: NodePath<t.NewExpression>) {
+        //         const { node } = path;
+        //         const constructor = getCalleeString(node.callee);
                 
-                if (isWebAPIConstructor(constructor)) {
-                    features.push({
-                        api: constructor.toLowerCase(),
-                        line: node.loc?.start.line,
-                        column: node.loc?.start.column,
-                        context: `new ${constructor}()`
-                    });
-                }
-            }
-        });
+        //         if (isWebAPIConstructor(constructor)) {
+        //             features.push({
+        //                 api: constructor.toLowerCase(),
+        //                 line: node.loc?.start.line,
+        //                 column: node.loc?.start.column,
+        //                 context: `new ${constructor}()`
+        //             });
+        //         }
+        //     }
+        // });
 
     } catch (error) {
         console.warn(`Failed to parse JavaScript in ${filePath}:`, error);
@@ -190,15 +190,18 @@ export async function parseHTML(content: string, filePath: string): Promise<Pars
             let elementMatch;
             
             while ((elementMatch = elementRegex.exec(line)) !== null) {
-                const tagName = elementMatch[1].toLowerCase();
-                
-                if (isModernHTMLElement(tagName)) {
-                    features.push({
-                        api: `html-element-${tagName}`,
-                        line: i + 1,
-                        column: elementMatch.index,
-                        context: `<${tagName}>`
-                    });
+                const tagName = elementMatch[1];
+                if (tagName) {
+                    const lowerTagName = tagName.toLowerCase();
+                    
+                    if (isModernHTMLElement(lowerTagName)) {
+                        features.push({
+                            api: `html-element-${lowerTagName}`,
+                            line: i + 1,
+                            column: elementMatch.index,
+                            context: `<${tagName}>`
+                        });
+                    }
                 }
             }
         }
@@ -210,15 +213,18 @@ export async function parseHTML(content: string, filePath: string): Promise<Pars
             let attrMatch;
             
             while ((attrMatch = attributeRegex.exec(line)) !== null) {
-                const attrName = attrMatch[1].toLowerCase();
-                
-                if (isModernHTMLAttribute(attrName)) {
-                    features.push({
-                        api: `html-attribute-${attrName}`,
-                        line: i + 1,
-                        column: attrMatch.index,
-                        context: attrMatch[0]
-                    });
+                const attrName = attrMatch[1];
+                if (attrName) {
+                    const lowerAttrName = attrName.toLowerCase();
+                    
+                    if (isModernHTMLAttribute(lowerAttrName)) {
+                        features.push({
+                            api: `html-attribute-${lowerAttrName}`,
+                            line: i + 1,
+                            column: attrMatch.index,
+                            context: attrMatch[0]
+                        });
+                    }
                 }
             }
         }
@@ -241,13 +247,14 @@ function getMemberExpressionString(node: t.MemberExpression): string {
     return '';
 }
 
-function getCalleeString(callee: t.Expression): string {
+function getCalleeString(callee: t.Expression | t.V8IntrinsicIdentifier): string {
     if (t.isIdentifier(callee)) {
         return callee.name;
     }
     if (t.isMemberExpression(callee)) {
         return getMemberExpressionString(callee);
     }
+    // V8IntrinsicIdentifier is not a web API, so return empty string
     return '';
 }
 

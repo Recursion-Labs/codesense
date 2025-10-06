@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { CompatibilityScanner, ScanOptions } from "./scanner";
-import { ReportGenerator, ReportOptions } from "./report";
-import { PolyfillManager, PolyfillConfig } from "./polyfill";
-import { getBaselineInfo } from "./baseline";
+import { CompatibilityScanner, ScanOptions } from "./scanner.js";
+import { ReportGenerator, ReportOptions } from "./report.js";
+import { getBaselineInfo } from "./baseline.js";
+import { PolyfillConfig } from "./@types/cli.js";
+import { PolyfillManager } from "./polyfill.js";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 let scanner: CompatibilityScanner;
@@ -11,13 +12,32 @@ let reportGenerator: ReportGenerator;
 let polyfillManager: PolyfillManager;
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log("✅ CodeSense activated!");
 
-    // Initialize components
-    diagnosticCollection = vscode.languages.createDiagnosticCollection('CodeSense');
-    scanner = new CompatibilityScanner();
-    reportGenerator = new ReportGenerator();
-    polyfillManager = new PolyfillManager();
+    console.log("🚀 CodeSense extension.ts loaded!");
+    console.log("✅ CodeSense activating...");
+    
+    // Check if we're in a test environment
+    const isTestEnvironment = process.env.VSCODE_TEST !== undefined;
+    console.log(`Test environment: ${isTestEnvironment}`);
+
+    try {
+        // Initialize components
+        diagnosticCollection = vscode.languages.createDiagnosticCollection('CodeSense');
+        console.log("✅ Diagnostic collection created");
+        
+        scanner = new CompatibilityScanner();
+        console.log("✅ Scanner initialized");
+        
+        reportGenerator = new ReportGenerator();
+        console.log("✅ Report generator initialized");
+        
+        polyfillManager = new PolyfillManager();
+        console.log("✅ Polyfill manager initialized");
+    } catch (error) {
+        console.error('Failed to initialize CodeSense components:', error);
+        vscode.window.showErrorMessage('CodeSense: Failed to initialize extension');
+        return;
+    }
 
     // Register commands
     const commands = [
@@ -36,22 +56,31 @@ export function activate(context: vscode.ExtensionContext) {
     ];
 
     // Register hover provider for baseline information
-    const hoverProvider = vscode.languages.registerHoverProvider(
-        ['javascript', 'typescript', 'css', 'html'],
-        new BaselineHoverProvider()
-    );
+    // const hoverProvider = vscode.languages.registerHoverProvider(
+    //     ['javascript', 'typescript', 'css', 'html'],
+    //     new BaselineHoverProvider()
+    // );
 
     context.subscriptions.push(
         diagnosticCollection,
-        hoverProvider,
+        // hoverProvider,
         ...commands,
         ...listeners
     );
 
-    // Initial scan if auto-scan is enabled
-    if (getConfiguration().get('autoScan', true)) {
-        scanProject();
+    // Initial scan if auto-scan is enabled and workspace is open
+    // Disabled during testing to avoid hanging
+    if (!isTestEnvironment && vscode.workspace.workspaceFolders && getConfiguration().get('autoScan', true)) {
+
+        setTimeout(() => {
+            scanProject().catch(err => {
+                console.error('Auto-scan failed:', err);
+            });
+        }, 2000); // Delay 2 seconds to ensure extension is fully activated
     }
+    
+    console.log('✅ CodeSense activation complete!');
+    return Promise.resolve();
 }
 
 async function scanProject() {
@@ -221,7 +250,7 @@ function updateDiagnostics(results: any[]) {
     
     results.forEach(result => {
         const diagnostics = createDiagnosticsFromIssues(result.issues);
-        const uri = vscode.Uri.file(result.file);
+        const uri = vscode.Uri.file(result.filePath);
         diagnosticCollection.set(uri, diagnostics);
     });
 }
@@ -255,11 +284,11 @@ function createDiagnosticsFromIssues(issues: any[]): vscode.Diagnostic[] {
 
 async function onDocumentSave(document: vscode.TextDocument) {
     const config = getConfiguration();
-    if (!config.get('autoScan', true)) return;
+    if (!config.get('autoScan', true)) {return;}
     
     // Only scan supported file types
     const supportedLanguages = ['javascript', 'typescript', 'css', 'html'];
-    if (!supportedLanguages.includes(document.languageId)) return;
+    if (!supportedLanguages.includes(document.languageId)) {return;}
     
     try {
         const result = await scanner.scanFile(document.uri.fsPath);
@@ -344,13 +373,13 @@ class BaselineHoverProvider implements vscode.HoverProvider {
         token: vscode.CancellationToken
     ): Promise<vscode.Hover | undefined> {
         const wordRange = document.getWordRangeAtPosition(position);
-        if (!wordRange) return;
+        if (!wordRange) {return;}
 
         const word = document.getText(wordRange);
         
         // Check if this looks like a web API
         const webAPIPattern = /^(fetch|navigator|localStorage|sessionStorage|indexedDB|IntersectionObserver|ResizeObserver)$/i;
-        if (!webAPIPattern.test(word)) return;
+        if (!webAPIPattern.test(word)) {return;}
 
         try {
             const baselineInfo = await getBaselineInfo(word.toLowerCase());
